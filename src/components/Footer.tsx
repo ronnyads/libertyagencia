@@ -1,0 +1,31 @@
+import { Instagram, MessageCircle, Mail } from "lucide-react";
+
+const Footer = () => (
+  <footer className="py-12 border-t border-foreground/5">
+    <div className="container px-4">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <a href="#" className="font-orbitron font-bold text-lg tracking-tighter">
+          LIBERTY<span className="text-primary">.</span>
+        </a>
+
+        <div className="flex items-center gap-6">
+          <a href="https://instagram.com/euronnyads" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+            <Instagram size={20} />
+          </a>
+          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+            <MessageCircle size={20} />
+          </a>
+          <a href="mailto:contato@liberty.agency" className="text-muted-foreground hover:text-primary transition-colors">
+            <Mail size={20} />
+          </a>
+        </div>
+
+        <p className="text-muted-foreground text-xs">
+          © {new Date().getFullYear()} Liberty Agency. Todos os direitos reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
+);
+
+export default Footer;
