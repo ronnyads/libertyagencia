@@ -72,7 +72,7 @@ const Mentoria = () => (
             ))}
           </div>
 
-          <div className="bg-orange-500 text-primary-foreground font-bold text-xs px-3 py-1.5 rounded-full inline-block animate-bounce">
+          <div className="bg-accent text-accent-foreground font-bold text-xs px-3 py-1.5 rounded-full inline-block animate-bounce" style={{ background: "#f97316" }}>
             🔥 Apenas 5 vagas abertas por mês
           </div>
         </motion.div>
