@@ -20,9 +20,10 @@ const Footer = () => (
           </a>
         </div>
 
-        <p className="text-muted-foreground text-xs">
-          © {new Date().getFullYear()} Liberty Agency. Todos os direitos reservados.
-        </p>
+        <div className="text-muted-foreground text-xs text-center md:text-right">
+          <p>CNPJ: 60.355.549/0001-20</p>
+          <p>© {new Date().getFullYear()} Liberty Agency. Todos os direitos reservados.</p>
+        </div>
       </div>
     </div>
   </footer>
