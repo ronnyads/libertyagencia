@@ -7,7 +7,7 @@ interface AuthContextType {
   role: UserRole;
   userId: string | null;
   studentName: string;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; role?: UserRole }>;
   logout: () => Promise<void>;
   hasSeenOnboarding: boolean;
   setHasSeenOnboarding: (v: boolean) => void;
@@ -58,8 +58,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { ok: false, error: 'Email ou senha incorretos.' };
+    // Busca o perfil imediatamente para garantir role correto antes do redirect
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, role')
+        .eq('id', data.user.id)
+        .single();
+      if (profile) {
+        setRole(profile.role as UserRole);
+        setStudentName(profile.name);
+        localStorage.setItem('zppia_role', profile.role);
+        return { ok: true, role: profile.role as UserRole };
+      }
+    }
     return { ok: true };
   };
 

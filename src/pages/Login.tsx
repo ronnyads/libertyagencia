@@ -10,16 +10,15 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const { login, role, isLoggedIn } = useAuth();
+  const { login, isLoggedIn, role } = useAuth();
   const navigate = useNavigate();
 
+  // Redireciona se já estiver logado (acesso direto à /login)
   useEffect(() => {
-    if (loggedIn && isLoggedIn) {
-      if (role === 'admin') navigate('/admin/dashboard', { replace: true });
-      else navigate('/dashboard', { replace: true });
+    if (isLoggedIn) {
+      navigate(role === 'admin' ? '/admin/dashboard' : '/dashboard', { replace: true });
     }
-  }, [loggedIn, isLoggedIn, role]);
+  }, [isLoggedIn, role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +26,13 @@ export default function Login() {
     setError('');
     const result = await login(email, password);
     setLoading(false);
-    if (result.ok) setLoggedIn(true);
-    else setError(result.error || 'E-mail ou senha incorretos.');
+    if (result.ok) {
+      // Usa o role retornado diretamente — sem race condition
+      const dest = result.role === 'admin' ? '/admin/dashboard' : '/dashboard';
+      navigate(dest, { replace: true });
+    } else {
+      setError(result.error || 'E-mail ou senha incorretos.');
+    }
   };
 
   return (
