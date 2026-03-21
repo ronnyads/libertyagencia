@@ -5,46 +5,88 @@ import { useLessons } from '@/hooks/useLessons';
 import { Play, Download, Check } from 'lucide-react';
 import { useState } from 'react';
 
-function VideoPlayer({ url, title }: { url: string; title: string }) {
+function VideoPlayer({ url, title, duration }: { url: string; title: string; duration?: string }) {
+  const [playing, setPlaying] = useState(false);
+
+  const ytMatch = url?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+  const vimeoMatch = url?.match(/vimeo\.com\/(\d+)/);
+
+  // Thumbnail do YouTube
+  const ytThumb = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+
+  // Placeholder (sem URL ou não reconhecido)
   if (!url) {
     return (
-      <div className="aspect-video flex flex-col items-center justify-center" style={{ background: 'linear-gradient(145deg, #0C1225, #0A0F1E)' }}>
-        <div className="w-[72px] h-[72px] rounded-full gradient-bg flex items-center justify-center" style={{ boxShadow: '0 0 0 12px rgba(59,130,246,0.12), 0 0 0 24px rgba(59,130,246,0.05)' }}>
-          <Play size={26} className="text-white ml-1" />
+      <div className="aspect-video flex flex-col items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(145deg, #0C1225, #0A0F1E)' }}>
+        <div className="w-[72px] h-[72px] rounded-full gradient-bg flex items-center justify-center" style={{ boxShadow: '0 0 0 16px rgba(59,130,246,0.1), 0 0 0 32px rgba(59,130,246,0.04)' }}>
+          <Play size={28} className="text-white ml-1" />
         </div>
-        <p className="font-inter text-sm mt-3" style={{ color: 'rgba(255,255,255,0.35)' }}>{title}</p>
+        <p className="font-inter text-sm mt-4" style={{ color: 'rgba(255,255,255,0.4)' }}>{title}</p>
         <p className="font-inter text-xs mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>Vídeo não configurado</p>
       </div>
     );
   }
 
-  // YouTube
-  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+  // Thumbnail overlay (lazy loading)
+  if (!playing) {
+    return (
+      <div className="aspect-video relative overflow-hidden cursor-pointer group" onClick={() => setPlaying(true)}
+        style={{ background: '#0A0F1E' }}>
+        {/* Thumbnail */}
+        {ytThumb && (
+          <img src={ytThumb} alt={title} className="absolute inset-0 w-full h-full object-cover"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        )}
+        {/* Overlay escuro */}
+        <div className="absolute inset-0 transition-opacity duration-300"
+          style={{ background: ytThumb ? 'rgba(6,11,24,0.55)' : 'linear-gradient(145deg, #0C1225, #0A0F1E)' }} />
+        {/* Glow radial atrás do botão */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)' }} />
+        </div>
+        {/* Botão de play */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-[72px] h-[72px] rounded-full gradient-bg flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+            style={{ boxShadow: '0 0 0 12px rgba(59,130,246,0.15), 0 0 0 24px rgba(59,130,246,0.06)' }}>
+            <Play size={28} className="text-white ml-1.5" />
+          </div>
+        </div>
+        {/* Título no rodapé */}
+        <div className="absolute bottom-0 left-0 right-0 px-5 py-4"
+          style={{ background: 'linear-gradient(to top, rgba(6,11,24,0.9) 0%, transparent 100%)' }}>
+          <p className="font-inter text-sm text-white line-clamp-1">{title}</p>
+          {duration && <p className="font-inter text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{duration}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // YouTube embed (nocookie + sem download)
   if (ytMatch) {
     return (
       <div className="aspect-video">
-        <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${ytMatch[1]}`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen title={title} />
+        <iframe className="w-full h-full" title={title}
+          src={`https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0&modestbranding=1&fs=0&iv_load_policy=3`}
+          allow="autoplay; encrypted-media" />
       </div>
     );
   }
 
   // Vimeo
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
   if (vimeoMatch) {
     return (
       <div className="aspect-video">
-        <iframe className="w-full h-full" src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
-          allow="autoplay; fullscreen; picture-in-picture" allowFullScreen title={title} />
+        <iframe className="w-full h-full" title={title}
+          src={`https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&title=0&byline=0&portrait=0`}
+          allow="autoplay; encrypted-media" />
       </div>
     );
   }
 
-  // Panda Video ou qualquer outro iframe-friendly
+  // Panda Video / outros
   return (
     <div className="aspect-video">
-      <iframe className="w-full h-full" src={url} allow="autoplay; fullscreen" allowFullScreen title={title} />
+      <iframe className="w-full h-full" src={url} title={title} allow="autoplay; encrypted-media" />
     </div>
   );
 }
