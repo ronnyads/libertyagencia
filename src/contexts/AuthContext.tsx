@@ -4,6 +4,7 @@ import type { Session, User } from '@supabase/supabase-js';
 
 interface AuthContextType {
   isLoggedIn: boolean;
+  authLoading: boolean;
   role: UserRole;
   userId: string | null;
   studentName: string;
@@ -87,17 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('zppia_onboarding', String(v));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#060B18' }}>
-        <div className="w-8 h-8 rounded-full border-2 border-zppia-blue border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <AuthContext.Provider value={{
       isLoggedIn: !!session,
+      authLoading: loading,
       role,
       userId: session?.user?.id ?? null,
       studentName,

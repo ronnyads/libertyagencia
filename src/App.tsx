@@ -32,24 +32,32 @@ import { ReactNode } from "react";
 
 const queryClient = new QueryClient();
 
+const Spinner = () => (
+  <div className="min-h-screen flex items-center justify-center" style={{ background: '#060B18' }}>
+    <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+  </div>
+);
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, authLoading } = useAuth();
+  if (authLoading) return <Spinner />;
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   return <AppLayout>{children}</AppLayout>;
 }
 
 function AdminRoute({ children }: { children: ReactNode }) {
-  const { isLoggedIn, role } = useAuth();
+  const { isLoggedIn, authLoading, role } = useAuth();
+  if (authLoading) return <Spinner />;
   if (!isLoggedIn) return <Navigate to="/login" replace />;
   if (role !== 'admin') return <Navigate to="/dashboard" replace />;
   return <AdminLayout>{children}</AdminLayout>;
 }
 
 function AppRoutes() {
-  const { isLoggedIn, role } = useAuth();
+  const { isLoggedIn, authLoading, role } = useAuth();
   return (
     <Routes>
-      <Route path="/login" element={isLoggedIn ? <Navigate to={role === 'admin' ? '/admin/dashboard' : '/dashboard'} replace /> : <Login />} />
+      <Route path="/login" element={authLoading ? <Spinner /> : isLoggedIn ? <Navigate to={role === 'admin' ? '/admin/dashboard' : '/dashboard'} replace /> : <Login />} />
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       {/* Student routes */}
