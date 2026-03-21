@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { student } from '@/data/student';
 import { modules } from '@/data/course';
 import { Play, Lock, CheckCircle, Zap, BookOpen, MessageCircle, Star, Award, Sparkles, HelpCircle } from 'lucide-react';
+import SpotlightCard from '@/components/ui/SpotlightCard';
+import TextReveal from '@/components/ui/TextReveal';
+import MagneticButton from '@/components/ui/MagneticButton';
 
 const fade = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 } };
 
@@ -36,15 +39,27 @@ export default function Dashboard() {
 
   return (
     <div className="p-4 lg:p-6 max-w-[1100px] mx-auto">
-      {/* Welcome Hero */}
+
+      {/* Welcome Hero — aurora background */}
       <motion.div {...fade} transition={{ duration: 0.5 }}
-        className="glass-card p-6 lg:p-7 mb-5 relative overflow-hidden"
+        className="aurora-bg glass-card p-6 lg:p-7 mb-5"
         style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.06) 100%)', borderColor: 'rgba(59,130,246,0.2)', borderRadius: 20 }}>
-        <div className="absolute right-0 top-0 w-[200px] h-[200px] rounded-full pointer-events-none" style={{ background: 'rgba(139,92,246,0.12)', filter: 'blur(60px)' }} />
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h2 className="font-sora font-bold text-xl lg:text-2xl text-white">{greeting}, <span data-placeholder>{student.name}</span> 👋</h2>
-            <p className="font-inter text-base mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>Continue de onde parou. Seu projeto está esperando por você.</p>
+            {/* AI badge */}
+            <span className="ai-pulse font-inter text-[11px] font-semibold tracking-widest mb-3 inline-flex"
+              style={{ color: '#3B82F6' }}>
+              MÉTODO ZPPIA
+            </span>
+
+            <TextReveal
+              text={`${greeting}, ${student.name} 👋`}
+              className="font-sora font-bold text-xl lg:text-2xl text-white mb-1"
+              delay={0.1}
+            />
+            <p className="font-inter text-base mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+              Continue de onde parou. Seu projeto está esperando por você.
+            </p>
             <div className="flex items-center gap-4 mt-4">
               <ProgressRing pct={student.progress} />
               <div>
@@ -52,13 +67,17 @@ export default function Dashboard() {
                 <p className="font-inter text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{student.completedLessons} aulas concluídas</p>
               </div>
             </div>
-            <button onClick={() => navigate('/modulo/m2/aula/l2-3')} className="btn-gradient text-sm mt-4 flex items-center gap-2">
+            <MagneticButton
+              className="btn-gradient text-sm mt-4 flex items-center gap-2"
+              onClick={() => navigate('/modulo/m2/aula/l2-3')}
+            >
               <Play size={14} /> Continuar: {student.currentLesson.title}
-            </button>
+            </MagneticButton>
           </div>
           <div className="hidden lg:flex flex-col gap-2">
             {[`🎯 ${student.progress}% concluído`, `📖 ${student.completedLessons} aulas`, `✓ ${student.completedTasks} tarefas`].map(t => (
-              <span key={t} className="px-3 py-1.5 rounded-lg font-inter font-medium text-[13px] border border-border" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)' }}>{t}</span>
+              <span key={t} className="px-3 py-1.5 rounded-lg font-inter font-medium text-[13px] border border-border"
+                style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)' }}>{t}</span>
             ))}
           </div>
         </div>
@@ -72,12 +91,14 @@ export default function Dashboard() {
         </div>
         <div>
           <p className="font-inter font-medium text-[11px] text-zppia-blue tracking-widest">AÇÃO DO DIA</p>
-          <p className="font-inter text-[15px] mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>Assista a Aula 2 do Módulo 3 e complete o checklist de estrutura do projeto.</p>
+          <p className="font-inter text-[15px] mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            Assista a Aula 2 do Módulo 3 e complete o checklist de estrutura do projeto.
+          </p>
           <button className="font-inter font-medium text-[13px] text-zppia-blue mt-2 hover:underline">Fazer agora →</button>
         </div>
       </motion.div>
 
-      {/* Module Cards */}
+      {/* Module Cards — com Spotlight e 3D tilt */}
       <motion.div {...fade} transition={{ duration: 0.5, delay: 0.12 }}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-sora font-bold text-lg text-white">Trilha do Método ZPPIA</h3>
@@ -85,23 +106,36 @@ export default function Dashboard() {
         </div>
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-4 px-4 lg:mx-0 lg:px-0">
           {modules.map((m, i) => (
-            <motion.div key={m.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 + i * 0.06 }}
-              className="glass-card p-5 flex-shrink-0 flex flex-col cursor-pointer hover:-translate-y-0.5 transition-transform duration-200"
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.12 + i * 0.06 }}
               style={{ minWidth: 220 }}
-              onClick={() => m.status !== 'locked' ? navigate(`/modulo/${m.id}`) : null}>
-              <div className="flex items-center justify-between">
-                <span className="gradient-bg text-white font-sora font-bold text-[11px] px-2 py-0.5 rounded-md">Módulo {m.number}</span>
-                {m.status === 'completed' ? <CheckCircle size={16} className="text-zppia-green" /> : m.status === 'in-progress' ? <Play size={16} className="text-zppia-blue" /> : <Lock size={16} style={{ color: 'rgba(255,255,255,0.35)' }} />}
-              </div>
-              <h4 className="font-sora font-semibold text-base text-white mt-3 line-clamp-2">{m.title}</h4>
-              <p className="font-inter text-[13px] mt-1.5 line-clamp-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.shortDesc}</p>
-              <div className="mt-3 progress-bar-track"><div className="progress-bar-fill" style={{ width: `${m.progress}%` }} /></div>
-              <div className="flex items-center justify-between mt-2.5">
-                <span className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.lessonCount} aulas</span>
-                <span className={`font-inter font-medium text-[13px] ${m.status === 'locked' ? '' : 'text-zppia-blue'}`} style={m.status === 'locked' ? { color: 'rgba(255,255,255,0.35)' } : {}}>
-                  {m.status === 'locked' ? 'Bloqueado' : 'Acessar →'}
-                </span>
-              </div>
+            >
+              <SpotlightCard
+                className="glass-card p-5 flex flex-col h-full cursor-pointer"
+                style={{ minWidth: 220, borderRadius: 16 }}
+                spotlightColor={m.status === 'locked' ? 'rgba(255,255,255,0.04)' : 'rgba(59,130,246,0.1)'}
+                onClick={() => m.status !== 'locked' ? navigate(`/modulo/${m.id}`) : null}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="gradient-bg text-white font-sora font-bold text-[11px] px-2 py-0.5 rounded-md">Módulo {m.number}</span>
+                  {m.status === 'completed' ? <CheckCircle size={16} className="text-zppia-green" /> :
+                   m.status === 'in-progress' ? <Play size={16} className="text-zppia-blue" /> :
+                   <Lock size={16} style={{ color: 'rgba(255,255,255,0.35)' }} />}
+                </div>
+                <h4 className="font-sora font-semibold text-base text-white mt-3 line-clamp-2">{m.title}</h4>
+                <p className="font-inter text-[13px] mt-1.5 line-clamp-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.shortDesc}</p>
+                <div className="mt-3 progress-bar-track"><div className="progress-bar-fill" style={{ width: `${m.progress}%` }} /></div>
+                <div className="flex items-center justify-between mt-2.5">
+                  <span className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.lessonCount} aulas</span>
+                  <span className={`font-inter font-medium text-[13px] ${m.status === 'locked' ? '' : 'text-zppia-blue'}`}
+                    style={m.status === 'locked' ? { color: 'rgba(255,255,255,0.35)' } : {}}>
+                    {m.status === 'locked' ? 'Bloqueado' : 'Acessar →'}
+                  </span>
+                </div>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>
@@ -109,12 +143,14 @@ export default function Dashboard() {
 
       {/* Progress + Activity */}
       <motion.div {...fade} transition={{ duration: 0.5, delay: 0.3 }} className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-        <div className="glass-card p-6">
+        <SpotlightCard className="glass-card p-6" style={{ borderRadius: 16 }} spotlightColor="rgba(139,92,246,0.08)">
           <h3 className="font-sora font-bold text-base text-white mb-4">Seu Progresso</h3>
           <div className="flex flex-col items-center">
             <ProgressRing size={80} pct={student.progress} stroke={4} />
             <p className="font-sora font-[800] text-lg gradient-text mt-1">{student.progress}%</p>
-            <p className="font-inter text-[13px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{student.completedLessons} de {student.totalLessons} aulas concluídas</p>
+            <p className="font-inter text-[13px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {student.completedLessons} de {student.totalLessons} aulas concluídas
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-2.5 mt-4">
             {[['2/5', 'Módulos'], [String(student.completedLessons), 'Aulas'], [String(student.completedTasks), 'Tarefas'], ['4h', 'Estudados']].map(([n, l]) => (
@@ -124,14 +160,15 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </SpotlightCard>
 
-        <div className="glass-card p-6">
+        <SpotlightCard className="glass-card p-6" style={{ borderRadius: 16 }} spotlightColor="rgba(59,130,246,0.08)">
           <h3 className="font-sora font-bold text-base text-white mb-4">Últimas Atividades</h3>
           <div className="flex flex-col">
             {student.activities.map((a, i) => (
               <div key={i} className="flex gap-3 items-start py-2 border-b border-border last:border-0">
-                <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: a.color === 'blue' ? '#3B82F6' : a.color === 'green' ? '#10B981' : 'rgba(255,255,255,0.35)' }} />
+                <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                  style={{ background: a.color === 'blue' ? '#3B82F6' : a.color === 'green' ? '#10B981' : 'rgba(255,255,255,0.35)' }} />
                 <div>
                   <p className="font-inter text-[13px] text-white">{a.text}</p>
                   <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{a.date}</p>
@@ -139,7 +176,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </SpotlightCard>
       </motion.div>
 
       {/* Shortcuts */}
@@ -147,15 +184,22 @@ export default function Dashboard() {
         <h3 className="font-sora font-bold text-base text-white mb-3">Atalhos Rápidos</h3>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {shortcuts.map(s => (
-            <div key={s.label} onClick={() => navigate(s.path)} className="glass-card p-4 flex items-center gap-3 cursor-pointer hover:border-zppia-blue/30 transition-colors">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.bg }}>
-                <s.icon size={18} className="text-zppia-blue" />
+            <SpotlightCard
+              key={s.label}
+              className="glass-card p-4 flex items-center gap-3 cursor-pointer hover:border-zppia-blue/30 transition-colors"
+              style={{ borderRadius: 16 }}
+              spotlightColor="rgba(59,130,246,0.07)"
+            >
+              <div onClick={() => navigate(s.path)} className="flex items-center gap-3 w-full">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.bg }}>
+                  <s.icon size={18} className="text-zppia-blue" />
+                </div>
+                <div>
+                  <p className="font-sora font-semibold text-sm text-white">{s.label}</p>
+                  <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.desc}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-sora font-semibold text-sm text-white">{s.label}</p>
-                <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{s.desc}</p>
-              </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </motion.div>
@@ -169,13 +213,13 @@ export default function Dashboard() {
             { color: '#8B5CF6', text: 'Bônus exclusivo disponível: Biblioteca de Prompts v2.', date: '3 dias atrás' },
             { color: '#F59E0B', text: 'Próxima sessão de mentoria: data a confirmar.', date: '' },
           ].map((n, i) => (
-            <div key={i} className="glass-card px-4 py-3 flex gap-3 items-start">
+            <SpotlightCard key={i} className="glass-card px-4 py-3 flex gap-3 items-start" style={{ borderRadius: 12 }}>
               <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: n.color }} />
               <div>
                 <p className="font-inter text-sm text-white">{n.text}</p>
                 {n.date && <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{n.date}</p>}
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </motion.div>
