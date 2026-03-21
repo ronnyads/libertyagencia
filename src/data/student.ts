@@ -1,0 +1,23 @@
+export const student = {
+  name: 'Seu Nome',
+  email: 'aluno@zppia.com',
+  initials: 'SN',
+  progress: 47,
+  completedLessons: 9,
+  totalLessons: 27,
+  completedModules: 2,
+  totalModules: 5,
+  completedTasks: 3,
+  totalTasks: 5,
+  studyHours: '4h 20m',
+  streak: 8,
+  memberSince: 'Março 2025',
+  currentLesson: { moduleId: 'm2', lessonId: 'l2-3', title: 'Validação rápida sem produto pronto' },
+  activities: [
+    { text: 'Aula 1 — Módulo 2 concluída', date: 'Hoje', color: 'blue' },
+    { text: 'Tarefa do Módulo 1 entregue', date: 'Ontem', color: 'green' },
+    { text: 'Módulo 1 concluído 🎉', date: '2 dias atrás', color: 'green' },
+    { text: 'Aula 5 — Módulo 1 concluída', date: '3 dias atrás', color: 'muted' },
+    { text: 'Aula 4 — Módulo 1 concluída', date: '4 dias atrás', color: 'muted' },
+  ],
+};
