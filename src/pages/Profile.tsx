@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
 import { student } from '@/data/student';
 import { useState } from 'react';
+import { LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const achievements = [
   { emoji: '🏁', title: 'Primeiro Módulo Concluído', desc: 'Completou o Módulo 1', earned: true },
@@ -12,6 +15,13 @@ export default function Profile() {
   const [notifs, setNotifs] = useState(true);
   const [reminders, setReminders] = useState(true);
   const [emails, setEmails] = useState(true);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   const Toggle = ({ on, onChange }: { on: boolean; onChange: () => void }) => (
     <button onClick={onChange} className={`w-11 h-6 rounded-full transition-all relative ${on ? 'gradient-bg' : 'bg-zppia-surface'}`}>
@@ -70,6 +80,16 @@ export default function Profile() {
           </div>
         </motion.div>
       </div>
+
+      {/* Logout */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="mt-4">
+        <button onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-inter font-medium text-sm transition-colors"
+          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444' }}>
+          <LogOut size={16} />
+          Sair da conta
+        </button>
+      </motion.div>
 
       {/* Preferences */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }} className="glass-card p-6 mt-4">
