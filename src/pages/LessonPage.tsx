@@ -1,19 +1,71 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { modules } from '@/data/course';
+import { useModules } from '@/hooks/useModules';
+import { useLessons } from '@/hooks/useLessons';
 import { Play, Download, Check } from 'lucide-react';
 import { useState } from 'react';
+
+function VideoPlayer({ url, title }: { url: string; title: string }) {
+  if (!url) {
+    return (
+      <div className="aspect-video flex flex-col items-center justify-center" style={{ background: 'linear-gradient(145deg, #0C1225, #0A0F1E)' }}>
+        <div className="w-[72px] h-[72px] rounded-full gradient-bg flex items-center justify-center" style={{ boxShadow: '0 0 0 12px rgba(59,130,246,0.12), 0 0 0 24px rgba(59,130,246,0.05)' }}>
+          <Play size={26} className="text-white ml-1" />
+        </div>
+        <p className="font-inter text-sm mt-3" style={{ color: 'rgba(255,255,255,0.35)' }}>{title}</p>
+        <p className="font-inter text-xs mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>Vídeo não configurado</p>
+      </div>
+    );
+  }
+
+  // YouTube
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) {
+    return (
+      <div className="aspect-video">
+        <iframe className="w-full h-full" src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen title={title} />
+      </div>
+    );
+  }
+
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    return (
+      <div className="aspect-video">
+        <iframe className="w-full h-full" src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
+          allow="autoplay; fullscreen; picture-in-picture" allowFullScreen title={title} />
+      </div>
+    );
+  }
+
+  // Panda Video ou qualquer outro iframe-friendly
+  return (
+    <div className="aspect-video">
+      <iframe className="w-full h-full" src={url} allow="autoplay; fullscreen" allowFullScreen title={title} />
+    </div>
+  );
+}
 
 export default function LessonPage() {
   const { id, lessonId } = useParams();
   const navigate = useNavigate();
-  const m = modules.find(mod => mod.id === id) || modules[0];
-  const lesson = m.lessons.find(l => l.id === lessonId) || m.lessons[0];
-  const lessonIdx = m.lessons.findIndex(l => l.id === lessonId);
-  const prevLesson = lessonIdx > 0 ? m.lessons[lessonIdx - 1] : null;
-  const nextLesson = lessonIdx < m.lessons.length - 1 ? m.lessons[lessonIdx + 1] : null;
-  const [completed, setCompleted] = useState(lesson.status === 'completed');
+  const { data: allModules = [] } = useModules();
+  const { data: lessons = [] } = useLessons(id);
   const [notes, setNotes] = useState('');
+  const [completed, setCompleted] = useState(false);
+
+  const m = allModules.find(mod => mod.id === id);
+  const lesson = lessons.find(l => l.id === lessonId);
+  const lessonIdx = lessons.findIndex(l => l.id === lessonId);
+  const prevLesson = lessonIdx > 0 ? lessons[lessonIdx - 1] : null;
+  const nextLesson = lessonIdx < lessons.length - 1 ? lessons[lessonIdx + 1] : null;
+
+  if (!m || !lesson) {
+    return <div className="p-6 text-white font-inter">Carregando...</div>;
+  }
 
   return (
     <div className="p-4 lg:p-6 max-w-[1100px] mx-auto">
@@ -26,36 +78,31 @@ export default function LessonPage() {
           {' → '}Aula {lesson.number}
         </p>
         <h1 className="font-sora font-bold text-2xl text-white">{lesson.title}</h1>
-        <p className="font-inter text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Módulo {m.number} · Aula {lesson.number} de {m.lessonCount}</p>
+        <p className="font-inter text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Módulo {m.number} · Aula {lesson.number} de {lessons.length}</p>
       </motion.div>
 
       <div className="flex flex-col lg:flex-row gap-4 mt-4">
         {/* Video + controls */}
         <div className="flex-1 lg:w-[65%]">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl overflow-hidden border border-border" style={{ borderColor: 'rgba(59,130,246,0.3)' }}>
-            <div className="aspect-video flex flex-col items-center justify-center" style={{ background: 'linear-gradient(145deg, #0C1225, #0A0F1E)' }}>
-              <div className="w-[72px] h-[72px] rounded-full gradient-bg flex items-center justify-center cursor-pointer" style={{ boxShadow: '0 0 0 12px rgba(59,130,246,0.12), 0 0 0 24px rgba(59,130,246,0.05)' }}>
-                <Play size={26} className="text-white ml-1" />
-              </div>
-              <p className="font-inter text-sm mt-3" style={{ color: 'rgba(255,255,255,0.35)' }} data-placeholder>Aula {lesson.number} — {lesson.title}</p>
-            </div>
+            className="rounded-2xl overflow-hidden border" style={{ borderColor: 'rgba(59,130,246,0.3)' }}>
+            <VideoPlayer url={lesson.video_url} title={`Aula ${lesson.number} — ${lesson.title}`} />
           </motion.div>
           <div className="mt-2 progress-bar-track"><div className="progress-bar-fill" style={{ width: completed ? '100%' : '35%' }} /></div>
           <div className="flex items-center justify-between mt-2 px-1">
             {prevLesson ? <button onClick={() => navigate(`/modulo/${m.id}/aula/${prevLesson.id}`)} className="font-inter font-medium text-[13px] text-zppia-blue hover:underline">← Aula anterior</button> : <span />}
-            <span className="font-inter text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Aula {lesson.number} de {m.lessonCount}</span>
+            <span className="font-inter text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Aula {lesson.number} de {lessons.length}</span>
             {nextLesson ? <button onClick={() => navigate(`/modulo/${m.id}/aula/${nextLesson.id}`)} className="font-inter font-medium text-[13px] text-zppia-blue hover:underline">Próxima aula →</button> : <span />}
           </div>
         </div>
 
         {/* Sidebar */}
         <div className="lg:w-[35%] flex flex-col gap-3">
-          {lesson.objectives && (
+          {lesson.objectives?.length > 0 && (
             <div className="glass-card p-5">
               <h3 className="font-sora font-semibold text-[15px] text-zppia-blue mb-2.5">🎯 O que você vai aprender</h3>
               <ul className="flex flex-col gap-1.5">
-                {lesson.objectives.map(o => <li key={o} className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>• {o}</li>)}
+                {lesson.objectives.map((o, i) => <li key={i} className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>• {o}</li>)}
               </ul>
             </div>
           )}
@@ -72,20 +119,6 @@ export default function LessonPage() {
               <h3 className="font-sora font-bold text-[15px] text-zppia-blue mb-2">⚡ Tarefa Prática</h3>
               <p className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>{lesson.task}</p>
               <button className="btn-ghost-blue text-[13px] mt-3 py-1.5 px-3">✅ Marcar como feita</button>
-            </div>
-          )}
-
-          {lesson.materials && (
-            <div className="glass-card p-5">
-              <h3 className="font-sora font-semibold text-[15px] text-white mb-2.5">📁 Material de Apoio</h3>
-              <div className="flex flex-col gap-2">
-                {lesson.materials.map(mat => (
-                  <div key={mat.name} className="flex items-center gap-2.5">
-                    <Download size={16} className="text-zppia-blue flex-shrink-0" />
-                    <span className="font-inter text-sm text-white hover:text-zppia-blue cursor-pointer">{mat.name}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
