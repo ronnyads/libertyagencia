@@ -1,4 +1,4 @@
-import { useState } from 'framer-motion';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useNotices, useUpsertNotice, useDeleteNotice, type DBNotice } from '@/hooks/useNotices';
