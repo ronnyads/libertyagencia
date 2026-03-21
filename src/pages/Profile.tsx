@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { student } from '@/data/student';
 import { useState } from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const achievements = [
   { emoji: '🏁', title: 'Primeiro Módulo Concluído', desc: 'Completou o Módulo 1', earned: true },
@@ -11,17 +12,45 @@ const achievements = [
   { emoji: '🏆', title: 'Método Completo', desc: 'Concluiu todos os 5 módulos', earned: false },
 ];
 
+function getInitials(name: string) {
+  return name.trim().split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SN';
+}
+
 export default function Profile() {
   const [notifs, setNotifs] = useState(true);
   const [reminders, setReminders] = useState(true);
   const [emails, setEmails] = useState(true);
-  const { logout } = useAuth();
+  const { logout, studentName, userId } = useAuth();
   const navigate = useNavigate();
+
+  const [editing, setEditing] = useState(false);
+  const [nameInput, setNameInput] = useState(studentName || '');
+  const [saving, setSaving] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
   };
+
+  const handleSave = async () => {
+    if (!nameInput.trim()) return;
+    setSaving(true);
+    try {
+      if (userId) {
+        await supabase.from('profiles').update({ name: nameInput.trim() }).eq('id', userId);
+      }
+      await supabase.auth.updateUser({ data: { name: nameInput.trim() } });
+      toast.success('Perfil atualizado!');
+      setEditing(false);
+    } catch {
+      toast.error('Erro ao salvar. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const displayName = nameInput || studentName || 'Seu Nome';
+  const initials = getInitials(displayName);
 
   const Toggle = ({ on, onChange }: { on: boolean; onChange: () => void }) => (
     <button onClick={onChange} className={`w-11 h-6 rounded-full transition-all relative ${on ? 'gradient-bg' : 'bg-zppia-surface'}`}>
@@ -39,13 +68,14 @@ export default function Profile() {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
         className="glass-card p-7 mt-5 mb-5 flex flex-col sm:flex-row items-center gap-5">
         <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
-          <span className="font-sora font-[800] text-[28px] text-white">SN</span>
+          <span className="font-sora font-[800] text-[28px] text-white">{initials}</span>
         </div>
         <div className="text-center sm:text-left">
-          <h3 className="font-sora font-bold text-2xl text-white" data-placeholder>{student.name}</h3>
-          <p className="font-inter text-[15px]" style={{ color: 'rgba(255,255,255,0.35)' }} data-placeholder>{student.email}</p>
-          <p className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Membro desde {student.memberSince}</p>
-          <button className="btn-ghost-blue text-sm mt-2">Editar Perfil</button>
+          <h3 className="font-sora font-bold text-2xl text-white">{displayName}</h3>
+          <p className="font-inter text-[15px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{studentName ? '' : 'aluno@zppia.com'}</p>
+          <button onClick={() => { setNameInput(studentName || ''); setEditing(true); }} className="btn-ghost-blue text-sm mt-2">
+            Editar Perfil
+          </button>
         </div>
       </motion.div>
 
@@ -54,7 +84,7 @@ export default function Profile() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card p-6">
           <h3 className="font-sora font-bold text-base text-white mb-4">Acesso ao Curso</h3>
           <p className="font-inter font-semibold text-[15px] text-white">Método ZPPIA</p>
-          <p className="font-inter text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }} data-placeholder>Acesso: Vitalício</p>
+          <p className="font-inter text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Acesso: Vitalício</p>
           <p className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Plataforma: ZPPIA Academy</p>
           <div className="border-t border-border mt-3 pt-3">
             <p className="font-inter text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>Mentor: Ronny Oliveira</p>
@@ -108,6 +138,43 @@ export default function Profile() {
           </div>
         ))}
       </motion.div>
+
+      {/* Edit Profile Modal */}
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(3,7,18,0.8)', backdropFilter: 'blur(8px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setEditing(false); }}>
+          <motion.div initial={{ opacity: 0, scale: 0.96, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="glass-card p-8 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-sora font-bold text-xl text-white">Editar Perfil</h3>
+              <button onClick={() => setEditing(false)} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                <X size={16} style={{ color: 'rgba(255,255,255,0.5)' }} />
+              </button>
+            </div>
+
+            <label className="block font-inter font-medium text-sm text-white mb-2">Nome</label>
+            <input
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              placeholder="Seu nome completo"
+              className="w-full px-4 py-3 rounded-xl font-inter text-sm text-white mb-6"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', outline: 'none' }}
+              onKeyDown={e => e.key === 'Enter' && handleSave()}
+              autoFocus
+            />
+
+            <div className="flex gap-3">
+              <button onClick={() => setEditing(false)} className="flex-1 py-2.5 rounded-xl font-inter font-medium text-sm"
+                style={{ border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)' }}>
+                Cancelar
+              </button>
+              <button onClick={handleSave} disabled={saving || !nameInput.trim()} className="flex-1 btn-gradient py-2.5 rounded-xl font-inter font-medium text-sm text-white disabled:opacity-50">
+                {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
