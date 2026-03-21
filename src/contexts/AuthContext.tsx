@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase, type UserRole } from '@/lib/supabase';
-import type { Session, User } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -16,6 +16,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function getRoleFromSession(session: Session | null): UserRole {
+  // Lê role do app_metadata — vem direto no JWT, sem query extra
+  return (session?.user?.app_metadata?.role as UserRole) || 'student';
+}
+
+function getNameFromSession(session: Session | null): string {
+  return session?.user?.user_metadata?.name
+    || session?.user?.email?.split('@')[0]
+    || 'Aluno';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole>('student');
@@ -29,57 +40,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) loadProfile(session.user);
-      else setLoading(false);
+      if (session) {
+        const r = getRoleFromSession(session);
+        setRole(r);
+        setStudentName(getNameFromSession(session));
+        localStorage.setItem('zppia_role', r);
+      }
+      setLoading(false);
     });
 
     // Listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session) loadProfile(session.user);
-      else { setRole('student'); setStudentName('Aluno'); setLoading(false); localStorage.removeItem('zppia_role'); }
+      if (session) {
+        const r = getRoleFromSession(session);
+        setRole(r);
+        setStudentName(getNameFromSession(session));
+        localStorage.setItem('zppia_role', r);
+      } else {
+        setRole('student');
+        setStudentName('Aluno');
+        localStorage.removeItem('zppia_role');
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  async function loadProfile(user: User) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('name, role')
-      .eq('id', user.id)
-      .single();
-
-    if (data) {
-      setRole(data.role as UserRole);
-      setStudentName(data.name);
-      localStorage.setItem('zppia_role', data.role);
-    }
-    setLoading(false);
-  }
-
   const login = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { ok: false, error: 'Email ou senha incorretos.' };
-    // Busca o perfil imediatamente para garantir role correto antes do redirect
-    if (data.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('name, role')
-        .eq('id', data.user.id)
-        .single();
-      if (profile) {
-        setRole(profile.role as UserRole);
-        setStudentName(profile.name);
-        localStorage.setItem('zppia_role', profile.role);
-        return { ok: true, role: profile.role as UserRole };
-      }
-    }
-    return { ok: true };
+    // Role vem direto do app_metadata no JWT — sem query extra
+    const r = getRoleFromSession(data.session);
+    setRole(r);
+    setStudentName(getNameFromSession(data.session));
+    localStorage.setItem('zppia_role', r);
+    return { ok: true, role: r };
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
+    setRole('student');
+    setStudentName('Aluno');
     localStorage.removeItem('zppia_role');
   };
 
