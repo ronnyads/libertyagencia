@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -8,8 +8,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, role } = useAuth();
+  const [loggedIn, setLoggedIn] = useState(false);
+  const { login, role, isLoggedIn } = useAuth();
   const navigate = useNavigate();
+
+  // Aguarda o role carregar do Supabase e então redireciona
+  useEffect(() => {
+    if (loggedIn && isLoggedIn) {
+      if (role === 'admin') navigate('/admin/dashboard', { replace: true });
+      else navigate('/dashboard', { replace: true });
+    }
+  }, [loggedIn, isLoggedIn, role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,12 +27,7 @@ export default function Login() {
     const result = await login(email, password);
     setLoading(false);
     if (result.ok) {
-      // role vem do onAuthStateChange — pequeno delay para carregar
-      setTimeout(() => {
-        const storedRole = localStorage.getItem('zppia_role');
-        if (storedRole === 'admin') navigate('/admin/dashboard', { replace: true });
-        else navigate('/dashboard', { replace: true });
-      }, 300);
+      setLoggedIn(true);
     } else {
       setError(result.error || 'Email ou senha incorretos.');
     }
