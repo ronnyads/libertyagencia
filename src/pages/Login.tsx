@@ -69,7 +69,7 @@ export default function Login() {
             Aluno: aluno@zppia.com / zppia2025
           </p>
           <p className="font-inter text-[11px] text-center mt-1" style={{ color: 'rgba(255,255,255,0.18)' }}>
-            Admin: ronny@zppia.com / admin2025
+            Admin: ronildo@adsliberty.com
           </p>
         </div>
       </motion.div>
