@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { modules } from '@/data/course';
+import { useModules } from '@/hooks/useModules';
+import { useLessons } from '@/hooks/useLessons';
 import { Check, Play, Lock, Download, Star, BookOpen, Clock, ClipboardList, FileText, Layout, Terminal } from 'lucide-react';
 
 const typeIcons: Record<string, typeof FileText> = { pdf: FileText, template: Layout, checklist: Check, prompt: Terminal };
@@ -8,8 +9,12 @@ const typeIcons: Record<string, typeof FileText> = { pdf: FileText, template: La
 export default function ModulePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const m = modules.find(mod => mod.id === id) || modules[0];
-  const nextModule = modules.find(mod => mod.number === m.number + 1);
+  const { data: allModules = [] } = useModules();
+  const { data: lessons = [] } = useLessons(id);
+  const m = allModules.find(mod => mod.id === id) || allModules[0];
+  const nextModule = allModules.find(mod => m && mod.number === m.number + 1);
+
+  if (!m) return <div className="p-6 text-white font-inter">Carregando...</div>;
 
   return (
     <div className="p-4 lg:p-6 max-w-[1100px] mx-auto">
@@ -20,7 +25,7 @@ export default function ModulePage() {
           <div className="flex-1">
             <span className="gradient-bg text-white font-sora font-bold text-xs px-2 py-1 rounded-md">Módulo {m.number}</span>
             <h1 className="font-sora font-[800] text-3xl lg:text-4xl text-white mt-2">{m.title}</h1>
-            <p className="font-inter text-[17px] mt-1.5" style={{ color: 'rgba(255,255,255,0.65)' }}>{m.fullDesc}</p>
+            <p className="font-inter text-[17px] mt-1.5" style={{ color: 'rgba(255,255,255,0.65)' }}>{m.full_desc}</p>
 
             <div className="mt-4 p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.04)' }}>
               <p className="font-sora font-medium text-[13px] text-zppia-blue">🎯 Objetivo:</p>
@@ -28,7 +33,7 @@ export default function ModulePage() {
             </div>
 
             <div className="flex flex-wrap gap-5 mt-4">
-              {[[BookOpen, `${m.lessonCount} aulas`], [Clock, `~${m.duration}`], [ClipboardList, `${m.taskCount} tarefa`], [Star, `${m.progress}% concluído`]].map(([Icon, text]) => (
+              {[[BookOpen, `${lessons.length} aulas`], [Clock, `~${m.duration}`], [ClipboardList, `${m.task_count} tarefa`], [Star, `${m.progress}% concluído`]].map(([Icon, text]) => (
                 <span key={text as string} className="flex items-center gap-1 font-inter text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
                   {/* @ts-ignore */}
                   <Icon size={14} />{text as string}
@@ -42,14 +47,14 @@ export default function ModulePage() {
         </div>
         <div className="mt-5">
           <div className="progress-bar-track"><div className="progress-bar-fill" style={{ width: `${m.progress}%` }} /></div>
-          <p className="font-inter text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.lessons.filter(l => l.status === 'completed').length} de {m.lessonCount} aulas concluídas</p>
+          <p className="font-inter text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>{lessons.filter(l => l.status === 'completed').length} de {lessons.length} aulas concluídas</p>
         </div>
       </motion.div>
 
       {/* Lessons */}
       <h3 className="font-sora font-bold text-lg text-white mb-3">Aulas do Módulo</h3>
       <div className="flex flex-col gap-2 mb-4">
-        {m.lessons.map((l, i) => (
+        {lessons.map((l, i) => (
           <motion.div key={l.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
             onClick={() => l.status !== 'locked' ? navigate(`/modulo/${m.id}/aula/${l.id}`) : null}
             className={`glass-card px-5 py-4 flex items-center gap-4 transition-all ${l.status !== 'locked' ? 'cursor-pointer hover:border-zppia-blue/30' : ''}`}>
@@ -77,7 +82,7 @@ export default function ModulePage() {
           <button className="font-inter font-medium text-[13px] text-zppia-blue hover:underline">Ver todos →</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {m.materials.map(mat => {
+          {([] as { name: string; desc: string; type: string }[]).map(mat => {
             const Icon = typeIcons[mat.type] || FileText;
             return (
               <div key={mat.name} className="flex items-center gap-3 p-3 rounded-lg bg-zppia-surface hover:bg-zppia-elevated transition-colors">

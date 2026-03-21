@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { student } from '@/data/student';
-import { modules } from '@/data/course';
+import { useModules } from '@/hooks/useModules';
 import { Play, Lock, CheckCircle, Zap, BookOpen, MessageCircle, Star, Award, Sparkles, HelpCircle } from 'lucide-react';
 import SpotlightCard from '@/components/ui/SpotlightCard';
 import TextReveal from '@/components/ui/TextReveal';
@@ -25,6 +25,7 @@ function ProgressRing({ size = 40, pct = 47, stroke = 3 }: { size?: number; pct?
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { data: modules = [] } = useModules();
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
@@ -126,10 +127,10 @@ export default function Dashboard() {
                    <Lock size={16} style={{ color: 'rgba(255,255,255,0.35)' }} />}
                 </div>
                 <h4 className="font-sora font-semibold text-base text-white mt-3 line-clamp-2">{m.title}</h4>
-                <p className="font-inter text-[13px] mt-1.5 line-clamp-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.shortDesc}</p>
+                <p className="font-inter text-[13px] mt-1.5 line-clamp-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.short_desc}</p>
                 <div className="mt-3 progress-bar-track"><div className="progress-bar-fill" style={{ width: `${m.progress}%` }} /></div>
                 <div className="flex items-center justify-between mt-2.5">
-                  <span className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.lessonCount} aulas</span>
+                  <span className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{m.task_count} aulas</span>
                   <span className={`font-inter font-medium text-[13px] ${m.status === 'locked' ? '' : 'text-zppia-blue'}`}
                     style={m.status === 'locked' ? { color: 'rgba(255,255,255,0.35)' } : {}}>
                     {m.status === 'locked' ? 'Bloqueado' : 'Acessar →'}
