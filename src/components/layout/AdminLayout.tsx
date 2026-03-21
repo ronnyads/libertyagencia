@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Target, BookOpen, Star, MessageCircle,
-  Bell, Users, Award, Settings, ChevronLeft
+  Bell, Users, Award, Settings, ChevronLeft, LogOut
 } from 'lucide-react';
 
 const navItems = [
@@ -21,7 +21,7 @@ const navItems = [
 function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { studentName } = useAuth();
+  const { studentName, logout } = useAuth();
 
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-[260px] z-30 border-r"
@@ -84,6 +84,12 @@ function AdminSidebar() {
           style={{ color: '#3B82F6' }}>
           <ChevronLeft size={16} />
           <span className="font-inter font-medium text-[12px]">Ver como aluno</span>
+        </button>
+        <button onClick={async () => { await logout(); navigate('/login', { replace: true }); }}
+          className="flex items-center gap-2 px-3 py-2 w-full rounded-[10px] hover:bg-red-500/10 transition-colors group mt-0.5"
+          style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <LogOut size={15} className="group-hover:text-red-400 transition-colors" />
+          <span className="font-inter text-[12px] group-hover:text-red-400 transition-colors">Sair da conta</span>
         </button>
       </div>
     </aside>

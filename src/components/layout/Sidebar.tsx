@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Target, BookOpen, Star, MessageCircle, BarChart3, Map, Award, Sparkles, User } from 'lucide-react';
-import { student } from '@/data/student';
+import { Home, Target, BookOpen, Star, MessageCircle, BarChart3, Map, Award, Sparkles, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { icon: Home, label: 'Início', path: '/dashboard' },
@@ -18,6 +18,16 @@ const navItems = [
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { studentName, logout } = useAuth();
+
+  const initials = studentName
+    ? studentName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    : 'U';
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <aside className="hidden lg:flex flex-col w-[260px] h-screen fixed left-0 top-0 z-30 border-r border-border" style={{ background: 'hsl(222, 47%, 3%)' }}>
@@ -36,14 +46,11 @@ export default function Sidebar() {
       <div className="mx-3 mt-3 mb-4 px-3 py-3 rounded-xl" style={{ background: 'hsl(222, 40%, 9%)' }}>
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
-            <span className="font-sora font-bold text-sm text-white">SN</span>
+            <span className="font-sora font-bold text-sm text-white">{initials}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-inter font-semibold text-sm text-white truncate" data-placeholder>{student.name}</p>
-            <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{student.progress}% concluído</p>
-            <div className="mt-1 w-full h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <div className="h-full rounded-full gradient-bg" style={{ width: `${student.progress}%` }} />
-            </div>
+            <p className="font-inter font-semibold text-sm text-white truncate">{studentName}</p>
+            <p className="font-inter text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Aluno ativo</p>
           </div>
         </div>
       </div>
@@ -68,10 +75,10 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer mentor */}
+      {/* Footer */}
       <div className="px-3 pb-4 mt-auto">
         <div className="border-t border-border mb-3" />
-        <div className="glass-card px-3 py-2.5 rounded-[10px] flex items-center gap-2.5">
+        <div className="glass-card px-3 py-2.5 rounded-[10px] flex items-center gap-2.5 mb-2">
           <div className="w-7 h-7 rounded-full gradient-bg flex items-center justify-center flex-shrink-0">
             <span className="font-sora font-bold text-[10px] text-white">R</span>
           </div>
@@ -80,6 +87,16 @@ export default function Sidebar() {
             <p className="font-inter text-[11px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Seu mentor</p>
           </div>
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] transition-all duration-150 hover:bg-red-500/10 group"
+          style={{ color: 'rgba(255,255,255,0.3)' }}
+        >
+          <LogOut size={16} className="group-hover:text-red-400 transition-colors" />
+          <span className="font-inter text-sm group-hover:text-red-400 transition-colors">Sair da conta</span>
+        </button>
       </div>
     </aside>
   );
