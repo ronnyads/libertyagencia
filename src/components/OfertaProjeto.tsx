@@ -4,7 +4,7 @@ import { CheckCircle, ArrowRight } from "lucide-react";
 import AnimatedHeading from "./ui/AnimatedHeading";
 
 const beneficios = [
-  "Sem compromisso financeiro",
+  "Demo online — sem download",
   "Resultado em até 7 dias",
   "Apenas 3 vagas por semana",
 ];
@@ -39,20 +39,20 @@ const OfertaProjeto = () => (
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-widest mb-4"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Oferta de Tempo Limitado
+            Demo Gratuita — Vagas Limitadas
           </motion.span>
 
           <h2 className="text-2xl md:text-3xl font-orbitron font-black uppercase mb-3 leading-tight">
-            <AnimatedHeading text="Criamos 1 projeto piloto de IA" />
+            <AnimatedHeading text="Veja sua ideia funcionando" />
             <br />
             <span className="neon-text">
-              <AnimatedHeading text="sem custo para você" delay={0.1} />
+              <AnimatedHeading text="em uma demo gratuita online" delay={0.1} />
             </span>
           </h2>
 
           <p className="text-muted-foreground text-sm max-w-md mb-5">
-            Analisamos seu negócio, construímos uma automação ou agente de IA real.
-            Você vê o resultado antes de investir qualquer coisa.
+            Nossa equipe mostra ao vivo como a IA transforma seu negócio.
+            Você vê tudo funcionando antes de decidir qualquer coisa.
           </p>
 
           <ul className="flex flex-wrap gap-x-6 gap-y-2 justify-center md:justify-start">
@@ -77,7 +77,7 @@ const OfertaProjeto = () => (
             to="/form"
             className="neon-button px-8 py-4 text-base font-bold inline-flex items-center gap-2 whitespace-nowrap"
           >
-            Garantir Meu Projeto Gratuito
+            Garantir Minha Demo Gratuita
             <ArrowRight size={18} />
           </Link>
           <p className="text-center text-xs text-muted-foreground mt-3">

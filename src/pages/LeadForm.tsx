@@ -8,6 +8,8 @@ import { CheckCircle, ArrowLeft, Zap, Shield, Clock } from 'lucide-react'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCreateLead } from '@/hooks/useCreateLead'
 
 const faturamentoOptions = [
@@ -19,6 +21,7 @@ const faturamentoOptions = [
 ] as const
 
 const schema = z.object({
+  aceite_termo: z.literal(true, { errorMap: () => ({ message: 'Você precisa aceitar os termos para continuar' }) }),
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   whatsapp: z.string().regex(/^\(\d{2}\)\s\d{4,5}-\d{4}$/, 'Formato: (11) 99999-9999'),
   faturamento: z.enum(faturamentoOptions, { required_error: 'Selecione uma opção' }),
@@ -72,12 +75,14 @@ function SuccessScreen() {
 export default function LeadForm() {
   const [searchParams] = useSearchParams()
   const [submitted, setSubmitted] = useState(false)
+  const [termoOpen, setTermoOpen] = useState(false)
   const servicoParam = searchParams.get('servico') ?? ''
   const createLead = useCreateLead()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      aceite_termo: undefined,
       nome: '',
       whatsapp: '',
       faturamento: undefined,
@@ -198,6 +203,39 @@ export default function LeadForm() {
 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    {/* Checkbox de Termo — ANTES dos campos */}
+                    <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
+                      <FormField
+                        control={form.control}
+                        name="aceite_termo"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start gap-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value === true}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5 border-primary/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm text-foreground/80 font-normal leading-relaxed cursor-pointer">
+                                Li e aceito o{' '}
+                                <button
+                                  type="button"
+                                  onClick={() => setTermoOpen(true)}
+                                  className="text-primary underline underline-offset-2 hover:text-primary/80"
+                                >
+                                  Termo de Visualização de Demo
+                                </button>
+                                {' '}— entendo que é apenas uma demo online, sem download de arquivos, e que a compra é opcional.
+                              </FormLabel>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
                     <FormField
                       control={form.control}
                       name="nome"
@@ -289,10 +327,10 @@ export default function LeadForm() {
 
                     <button
                       type="submit"
-                      disabled={createLead.isPending}
+                      disabled={createLead.isPending || !form.watch('aceite_termo')}
                       className="neon-button w-full py-4 text-base font-bold mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {createLead.isPending ? 'Enviando...' : 'Garantir Meu Projeto Gratuito →'}
+                      {createLead.isPending ? 'Enviando...' : 'Garantir Minha Demo Gratuita →'}
                     </button>
 
                     <p className="text-center text-xs text-muted-foreground">
@@ -300,6 +338,35 @@ export default function LeadForm() {
                     </p>
                   </form>
                 </Form>
+
+                <Dialog open={termoOpen} onOpenChange={setTermoOpen}>
+                  <DialogContent className="bg-card border-foreground/15 max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="font-orbitron text-lg">Termo de Visualização de Demo</DialogTitle>
+                      <DialogDescription className="text-muted-foreground text-xs">
+                        Liberty Company Ads Ltda — CNPJ: 60.355.549/0001-20
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="text-sm text-foreground/80 space-y-3 max-h-72 overflow-y-auto pr-2">
+                      <p>1. Nossa equipe vai mostrar como sua ideia fica pronta, em uma apresentação online ao vivo.</p>
+                      <p>2. A demo é visualizada online — nenhum arquivo é entregue ou transferido durante esta etapa.</p>
+                      <p>3. Caso queira contratar após ver a demo, o investimento será informado na reunião.</p>
+                      <p>4. Não gostar? Sem problema nenhum — zero compromisso financeiro.</p>
+                      <p>5. O conteúdo apresentado na demo é propriedade da Liberty Agência e não pode ser reproduzido sem contratação.</p>
+                      <p>6. Ao aceitar, você autoriza a Liberty Agência a entrar em contato via WhatsApp para agendamento.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        form.setValue('aceite_termo', true)
+                        setTermoOpen(false)
+                      }}
+                      className="neon-button w-full py-3 text-sm font-bold mt-2"
+                    >
+                      Entendi e Aceito ✓
+                    </button>
+                  </DialogContent>
+                </Dialog>
               </motion.div>
             </motion.div>
           )}
