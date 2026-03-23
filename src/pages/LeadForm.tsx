@@ -348,6 +348,11 @@ export default function LeadForm() {
                       )}
                     />
 
+                    {!form.watch('aceite_termo') && (
+                      <p className="text-center text-xs text-primary font-medium animate-pulse">
+                        ↑ Aceite o termo acima para continuar
+                      </p>
+                    )}
                     <button
                       type="submit"
                       disabled={createLead.isPending || !form.watch('aceite_termo')}
