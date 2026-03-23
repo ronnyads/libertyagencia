@@ -104,7 +104,7 @@ function exportCSV(leads: Lead[]) {
 const NAV_ITEMS = [
   { id: 'pipeline',   label: 'Pipeline',   icon: Kanban,       active: true },
   { id: 'contatos',   label: 'Contatos',   icon: Users,        active: true },
-  { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: false },
+  { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: true },
   { id: 'atividades', label: 'Atividades', icon: CheckSquare,  active: false },
   { id: 'relatorios', label: 'Relatórios', icon: BarChart2,    active: false },
 ]
@@ -701,6 +701,258 @@ function ContatosView({ leads, isLoading, onOpen }: {
   )
 }
 
+// ─── Negócios View ───────────────────────────────────────────────────────────
+
+const STAGE_BAR_COLORS: Record<LeadStatus, string> = {
+  novo: 'bg-blue-500',
+  em_contato: 'bg-yellow-500',
+  qualificado: 'bg-purple-500',
+  proposta_enviada: 'bg-orange-500',
+  negociacao: 'bg-cyan-500',
+  ganho: 'bg-emerald-500',
+  perdido: 'bg-red-500',
+}
+
+function fmt(value: number) {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+}
+
+function NegociosView({ leads, isLoading, onOpen }: {
+  leads: Lead[]
+  isLoading: boolean
+  onOpen: (lead: Lead) => void
+}) {
+  const stats = useMemo(() => {
+    const comValor = leads.filter((l) => l.valor_estimado != null)
+    const ganhos = comValor.filter((l) => l.status === 'ganho')
+    const emAndamento = comValor.filter((l) => l.status !== 'ganho' && l.status !== 'perdido')
+    const total = comValor.reduce((s, l) => s + (l.valor_estimado ?? 0), 0)
+    const totalGanho = ganhos.reduce((s, l) => s + (l.valor_estimado ?? 0), 0)
+    const totalAndamento = emAndamento.reduce((s, l) => s + (l.valor_estimado ?? 0), 0)
+    const ticket = comValor.length > 0 ? total / comValor.length : 0
+    return { total, totalGanho, totalAndamento, ticket, comValor: comValor.length, ganhos: ganhos.length, emAndamento: emAndamento.length }
+  }, [leads])
+
+  const stageData = useMemo(() => {
+    return STAGES.map((stage) => {
+      const stageLeads = leads.filter((l) => l.status === stage.value && l.valor_estimado != null)
+      const valor = stageLeads.reduce((s, l) => s + (l.valor_estimado ?? 0), 0)
+      return { ...stage, valor, count: stageLeads.length }
+    })
+  }, [leads])
+
+  const maxValor = Math.max(...stageData.map((s) => s.valor), 1)
+
+  const dealsComValor = useMemo(() =>
+    leads.filter((l) => l.valor_estimado != null).sort((a, b) => (b.valor_estimado ?? 0) - (a.valor_estimado ?? 0)),
+    [leads]
+  )
+  const dealsSemValor = useMemo(() =>
+    leads.filter((l) => l.valor_estimado == null),
+    [leads]
+  )
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Carregando negócios...</div>
+  }
+
+  return (
+    <div className="flex-1 overflow-auto p-6 space-y-6">
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: 'Pipeline Total',
+            value: `R$ ${fmt(stats.total)}`,
+            sub: `${stats.comValor} deal${stats.comValor !== 1 ? 's' : ''} com valor`,
+            icon: Briefcase,
+            color: 'text-primary',
+            border: 'border-primary/20',
+            bg: 'bg-primary/5',
+          },
+          {
+            label: 'Ganho',
+            value: `R$ ${fmt(stats.totalGanho)}`,
+            sub: `${stats.ganhos} fechado${stats.ganhos !== 1 ? 's' : ''}`,
+            icon: BarChart2,
+            color: 'text-emerald-400',
+            border: 'border-emerald-500/20',
+            bg: 'bg-emerald-500/5',
+          },
+          {
+            label: 'Em Andamento',
+            value: `R$ ${fmt(stats.totalAndamento)}`,
+            sub: `${stats.emAndamento} oportunidade${stats.emAndamento !== 1 ? 's' : ''}`,
+            icon: RefreshCw,
+            color: 'text-cyan-400',
+            border: 'border-cyan-500/20',
+            bg: 'bg-cyan-500/5',
+          },
+          {
+            label: 'Ticket Médio',
+            value: `R$ ${fmt(stats.ticket)}`,
+            sub: 'por deal com valor',
+            icon: ChevronRight,
+            color: 'text-orange-400',
+            border: 'border-orange-500/20',
+            bg: 'bg-orange-500/5',
+          },
+        ].map((card) => (
+          <div key={card.label} className={`rounded-xl border ${card.border} ${card.bg} p-5`}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{card.label}</span>
+              <card.icon size={16} className={card.color} />
+            </div>
+            <p className={`font-orbitron font-bold text-xl ${card.color} mb-1`}>{card.value}</p>
+            <p className="text-xs text-muted-foreground">{card.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Valor por Etapa */}
+      <div className="rounded-xl border border-foreground/8 bg-card/20 p-6">
+        <h3 className="text-sm font-semibold text-foreground mb-5 uppercase tracking-wider">Valor por Etapa</h3>
+        <div className="space-y-3">
+          {stageData.filter((s) => s.value !== 'perdido').map((stage) => (
+            <div key={stage.value} className="flex items-center gap-4">
+              <span className={`text-xs font-medium w-36 shrink-0 ${stage.color}`}>{stage.label}</span>
+              <div className="flex-1 h-2 bg-foreground/8 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${STAGE_BAR_COLORS[stage.value]}`}
+                  style={{ width: stage.valor > 0 ? `${(stage.valor / maxValor) * 100}%` : '0%' }}
+                />
+              </div>
+              <div className="flex items-center gap-3 shrink-0 w-40 justify-end">
+                <span className="text-xs text-foreground font-medium">
+                  {stage.valor > 0 ? `R$ ${fmt(stage.valor)}` : <span className="text-muted-foreground/40">—</span>}
+                </span>
+                <span className={`text-[11px] px-1.5 py-0.5 rounded-full border ${stage.badge}`}>
+                  {stage.count}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabela de Deals com Valor */}
+      <div className="rounded-xl border border-foreground/8 bg-card/20 overflow-hidden">
+        <div className="px-6 py-4 border-b border-foreground/8 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+            Deals com Valor Definido
+          </h3>
+          <span className="text-xs text-muted-foreground">{dealsComValor.length} deals</span>
+        </div>
+        {dealsComValor.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-sm gap-2">
+            <Briefcase size={32} className="opacity-20" />
+            <p>Nenhum deal com valor definido.</p>
+            <p className="text-xs">Abra um contato e adicione o valor estimado.</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="border-b border-foreground/8 bg-card/40">
+              <tr>
+                {['Nome', 'Etapa', 'Valor', 'Faturamento', 'Serviço', 'Criado'].map((h) => (
+                  <th key={h} className="text-left px-5 py-3 text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dealsComValor.map((lead, i) => {
+                const cfg = stageConfig(lead.status)
+                return (
+                  <tr
+                    key={lead.id}
+                    onClick={() => onOpen(lead)}
+                    className={`border-b border-foreground/5 hover:bg-foreground/5 cursor-pointer transition-colors ${i % 2 === 0 ? '' : 'bg-foreground/[0.02]'}`}
+                  >
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                          {lead.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-sm font-medium text-foreground">{lead.nome}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`inline-flex items-center text-[11px] px-2 py-0.5 rounded-full border whitespace-nowrap ${cfg.badge}`}>
+                        {cfg.label}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className="text-emerald-400 font-bold text-sm">R$ {fmt(lead.valor_estimado ?? 0)}</span>
+                    </td>
+                    <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">{lead.faturamento}</td>
+                    <td className="px-5 py-3 text-xs text-foreground/70 max-w-[140px] truncate">
+                      {lead.servico_interesse || <span className="text-muted-foreground/40">—</span>}
+                    </td>
+                    <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(lead.created_at)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Deals sem valor */}
+      {dealsSemValor.length > 0 && (
+        <div className="rounded-xl border border-foreground/8 bg-foreground/[0.02] overflow-hidden">
+          <div className="px-6 py-4 border-b border-foreground/8 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Sem Valor Definido
+            </h3>
+            <span className="text-xs text-muted-foreground">{dealsSemValor.length} contatos</span>
+          </div>
+          <table className="w-full text-sm">
+            <tbody>
+              {dealsSemValor.map((lead, i) => {
+                const cfg = stageConfig(lead.status)
+                return (
+                  <tr
+                    key={lead.id}
+                    onClick={() => onOpen(lead)}
+                    className={`border-b border-foreground/5 hover:bg-foreground/5 cursor-pointer transition-colors ${i % 2 === 0 ? '' : 'bg-foreground/[0.02]'}`}
+                  >
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-foreground/10 flex items-center justify-center text-muted-foreground text-xs font-bold shrink-0">
+                          {lead.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-sm text-foreground/70">{lead.nome}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`inline-flex items-center text-[11px] px-2 py-0.5 rounded-full border whitespace-nowrap ${cfg.badge}`}>
+                        {cfg.label}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">{lead.faturamento}</td>
+                    <td className="px-5 py-3 text-xs text-foreground/60 max-w-[140px] truncate">
+                      {lead.servico_interesse || <span className="text-muted-foreground/40">—</span>}
+                    </td>
+                    <td className="px-5 py-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(lead.created_at)}</td>
+                    <td className="px-5 py-3">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onOpen(lead) }}
+                        className="text-[11px] text-primary hover:text-primary/80 border border-primary/30 hover:border-primary/60 px-2 py-0.5 rounded-md transition-colors flex items-center gap-1"
+                      >
+                        <Plus size={10} /> Adicionar valor
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
@@ -751,6 +1003,9 @@ function Dashboard() {
         )}
         {view === 'contatos' && (
           <ContatosView leads={leads} isLoading={isLoading} onOpen={handleOpen} />
+        )}
+        {view === 'negocios' && (
+          <NegociosView leads={leads} isLoading={isLoading} onOpen={handleOpen} />
         )}
       </div>
 
