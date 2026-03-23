@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   RefreshCw, LogOut, Copy, ExternalLink, Lock, ChevronRight,
   Kanban, Users, Briefcase, CheckSquare, BarChart2, UserCircle,
@@ -1347,7 +1347,7 @@ function Dashboard() {
   const conversao = leads.length > 0 ? Math.round((ganhos / leads.length) * 100) : 0
 
   const handleOpen = (lead: Lead) => { setSelectedLead(lead); setSheetOpen(true) }
-  const handleLogout = () => { localStorage.removeItem('liberty_admin'); window.location.reload() }
+  const handleLogout = () => supabase.auth.signOut()
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -1400,19 +1400,22 @@ function Dashboard() {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
-function LoginScreen({ onLogin }: { onLogin: () => void }) {
+function LoginScreen() {
+  const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [erro, setErro] = useState(false)
+  const [erro, setErro] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (senha === 'liberty2025') {
-      localStorage.setItem('liberty_admin', 'liberty2025')
-      onLogin()
-    } else {
-      setErro(true)
+    setErro('')
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password: senha })
+    if (error) {
+      setErro('E-mail ou senha incorretos.')
       setSenha('')
     }
+    setLoading(false)
   }
 
   return (
@@ -1427,15 +1430,24 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
         <p className="text-muted-foreground text-sm mb-8">Painel Administrativo</p>
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <Input
-            type="password"
-            value={senha}
-            onChange={(e) => { setSenha(e.target.value); setErro(false) }}
-            placeholder="Senha de acesso"
+            type="email"
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); setErro('') }}
+            placeholder="E-mail"
             className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground"
             autoFocus
           />
-          {erro && <p className="text-destructive text-xs">Senha incorreta. Tente novamente.</p>}
-          <button type="submit" className="neon-button w-full py-3 font-bold">Entrar</button>
+          <Input
+            type="password"
+            value={senha}
+            onChange={(e) => { setSenha(e.target.value); setErro('') }}
+            placeholder="Senha"
+            className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground"
+          />
+          {erro && <p className="text-destructive text-xs">{erro}</p>}
+          <button type="submit" disabled={loading} className="neon-button w-full py-3 font-bold disabled:opacity-60">
+            {loading ? 'Entrando...' : 'Entrar'}
+          </button>
         </form>
       </div>
     </div>
@@ -1445,9 +1457,15 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 export default function AdminPanel() {
-  const [authed, setAuthed] = useState(() =>
-    localStorage.getItem('liberty_admin') === 'liberty2025'
-  )
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />
+  const [session, setSession] = useState<import('@supabase/supabase-js').Session | null | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (session === undefined) return null
+  if (!session) return <LoginScreen />
   return <Dashboard />
 }
