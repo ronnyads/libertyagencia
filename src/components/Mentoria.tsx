@@ -58,7 +58,7 @@ const Mentoria = () => (
             ))}
           </ul>
           <Link
-            to="/form?servico=Mentoria+Intensiva"
+            to="/mentoria-form"
             className="neon-button px-8 py-3.5 text-sm inline-flex items-center gap-2"
           >
             Garantir minha vaga <ArrowRight size={18} />
