@@ -25,6 +25,7 @@ const schema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   whatsapp: z.string().regex(/^\(\d{2}\)\s\d{4,5}-\d{4}$/, 'Formato: (11) 99999-9999'),
   faturamento: z.enum(faturamentoOptions, { required_error: 'Selecione uma opção' }),
+  email: z.string().email('E-mail invalido').optional().or(z.literal('')),
   instagram: z.string().optional(),
   servico_interesse: z.string().optional(),
 })
@@ -85,6 +86,7 @@ export default function LeadForm() {
       aceite_termo: undefined,
       nome: '',
       whatsapp: '',
+      email: '',
       faturamento: undefined,
       instagram: '',
       servico_interesse: servicoParam,
@@ -266,6 +268,27 @@ export default function LeadForm() {
                               placeholder="(11) 99999-9999"
                               maxLength={15}
                               onChange={(e) => field.onChange(maskPhone(e.target.value))}
+                              className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground placeholder:text-muted-foreground/50"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground/80 text-sm">
+                            E-mail <span className="text-muted-foreground">(opcional — para receber confirmacao)</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="seu@email.com"
                               className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground placeholder:text-muted-foreground/50"
                             />
                           </FormControl>

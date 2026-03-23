@@ -140,8 +140,10 @@ export default function MentoriaForm() {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [email, setEmail] = useState('')
   const [nomeError, setNomeError] = useState('')
   const [zapError, setZapError] = useState('')
+  const [emailError, setEmailError] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const createLead = useCreateMentoriaLead()
 
@@ -179,11 +181,18 @@ export default function MentoriaForm() {
     } else {
       setZapError('')
     }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('E-mail invalido')
+      valid = false
+    } else {
+      setEmailError('')
+    }
     if (!valid) return
 
     await createLead.mutateAsync({
       nome: nome.trim(),
       whatsapp,
+      email: email || undefined,
       situacao: answers.situacao ?? '',
       projeto: answers.projeto ?? '',
       nivel_tech: answers.nivel_tech ?? '',
@@ -329,6 +338,20 @@ export default function MentoriaForm() {
                       className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground placeholder:text-muted-foreground/50"
                     />
                     {zapError && <p className="text-red-400 text-xs mt-1">{zapError}</p>}
+                  </div>
+
+                  <div>
+                    <label className="text-foreground/80 text-sm block mb-1.5">
+                      E-mail <span className="text-muted-foreground/60">(opcional — para receber confirmacao)</span>
+                    </label>
+                    <Input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      type="email"
+                      placeholder="seu@email.com"
+                      className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground placeholder:text-muted-foreground/50"
+                    />
+                    {emailError && <p className="text-red-400 text-xs mt-1">{emailError}</p>}
                   </div>
 
                   <button
