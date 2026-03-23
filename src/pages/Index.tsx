@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 
 const Problema = lazy(() => import("@/components/Problema"));
 const Servicos = lazy(() => import("@/components/Servicos"));
+const OfertaProjeto = lazy(() => import("@/components/OfertaProjeto"));
 const Diferenciais = lazy(() => import("@/components/Diferenciais"));
 const Resultados = lazy(() => import("@/components/Resultados"));
 const Mentoria = lazy(() => import("@/components/Mentoria"));
@@ -21,6 +22,7 @@ const Index = () => {
       <Suspense fallback={<Fallback />}>
         <Problema />
         <Servicos />
+        <OfertaProjeto />
         <Diferenciais />
         <Resultados />
         <Mentoria />

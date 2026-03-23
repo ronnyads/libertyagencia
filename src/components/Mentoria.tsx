@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Check, MessageCircle, Users, Video, Clock, Headphones } from "lucide-react";
+import { Check, ArrowRight, Users, Video, Clock, Headphones } from "lucide-react";
+import { Link } from "react-router-dom";
 import AnimatedHeading from "./ui/AnimatedHeading";
 
 const checklist = [
@@ -56,14 +57,12 @@ const Mentoria = () => (
               </motion.li>
             ))}
           </ul>
-          <a
-            href="https://wa.me/5511999999999?text=Olá, quero saber mais sobre a Mentoria 1:1."
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/form?servico=Mentoria+Intensiva"
             className="neon-button px-8 py-3.5 text-sm inline-flex items-center gap-2"
           >
-            <MessageCircle size={18} /> Quero a Mentoria
-          </a>
+            Garantir minha vaga <ArrowRight size={18} />
+          </Link>
         </motion.div>
 
         {/* Right — Ticket card */}
@@ -94,8 +93,9 @@ const Mentoria = () => (
             ))}
           </div>
 
-          <div className="bg-accent text-accent-foreground font-bold text-xs px-3 py-1.5 rounded-full inline-block animate-bounce" style={{ background: "#f97316" }}>
-            🔥 Apenas 5 vagas abertas por mês
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary font-bold text-xs px-3 py-1.5 rounded-full inline-flex">
+            <Users size={12} className="shrink-0" />
+            Apenas 2 vagas disponíveis
           </div>
         </motion.div>
       </div>

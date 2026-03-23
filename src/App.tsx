@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,6 +8,9 @@ import CustomCursor from "@/components/ui/CustomCursor";
 import ScrollProgress from "@/components/ui/ScrollProgress";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+
+const LeadForm = lazy(() => import("./pages/LeadForm"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 
 const queryClient = new QueryClient();
 
@@ -20,6 +24,8 @@ const App = () => (
         <ScrollProgress />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/form" element={<Suspense fallback={null}><LeadForm /></Suspense>} />
+          <Route path="/admin" element={<Suspense fallback={null}><AdminPanel /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

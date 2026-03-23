@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { MessageCircle, Instagram } from "lucide-react";
+import { Link } from "react-router-dom";
 import HeroCanvas from "./HeroCanvas";
 import CyclingText from "./CyclingText";
 
@@ -27,11 +28,27 @@ const Hero = () => (
     <div className="neon-orb w-[300px] h-[300px] bottom-20 right-10 opacity-30" />
 
     <div className="container relative z-10 text-center px-4">
-      {/* Badge */}
+      {/* Urgency pill */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
+        className="mb-6"
+      >
+        <Link
+          to="/form"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/40 bg-primary/10 text-primary text-sm font-medium cursor-pointer hover:bg-primary/15 transition-colors"
+        >
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          Projeto piloto gratuito — apenas 3 vagas esta semana
+        </Link>
+      </motion.div>
+
+      {/* Badge */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
       >
         <span className="inline-block border border-primary/30 bg-primary/10 text-primary text-xs uppercase tracking-widest px-4 py-1.5 rounded-full animate-pulse-neon mb-10">
           Agência de IA — Projetos Ativos em 2025
@@ -96,6 +113,18 @@ const Hero = () => (
         >
           <Instagram size={20} /> @euronnyads
         </a>
+      </motion.div>
+
+      {/* Secondary CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.1 }}
+        className="mt-4"
+      >
+        <Link to="/form" className="text-primary text-sm underline underline-offset-4 hover:text-primary/80 transition-colors">
+          Ou garanta um projeto gratuito →
+        </Link>
       </motion.div>
 
       {/* Scroll hint */}

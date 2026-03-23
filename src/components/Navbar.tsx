@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 
 const navLinks = [
@@ -57,6 +58,13 @@ const Navbar = () => {
               </a>
             );
           })}
+          <Link
+            to="/form"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Projeto Grátis
+          </Link>
           <a
             href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
             target="_blank"

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import AnimatedHeading from "./ui/AnimatedHeading";
 import RippleButton from "./ui/RippleButton";
 
@@ -47,17 +48,25 @@ const CtaFinal = () => (
           transition={{ delay: 0.3 }}
           className="text-muted-foreground mb-10 max-w-lg mx-auto"
         >
-          Domine a tecnologia ou seja substituído por ela. Fale com a gente agora e comece a transformar seu negócio.
+          Empresas que adotam IA agora têm 3x mais eficiência em 90 dias. As que esperam, perdem espaço todo mês.
         </motion.p>
 
-        <RippleButton
-          href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
-          target="_blank"
-          rel="noopener noreferrer"
-          className="neon-button px-10 py-4 text-lg inline-flex items-center gap-3"
-        >
-          <MessageCircle size={22} /> Falar com a Liberty
-        </RippleButton>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            to="/form"
+            className="neon-button px-10 py-4 text-lg inline-flex items-center justify-center gap-3"
+          >
+            <ArrowRight size={22} /> Garantir Projeto Gratuito
+          </Link>
+          <RippleButton
+            href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="neon-button-outline px-10 py-4 text-lg inline-flex items-center justify-center gap-3"
+          >
+            <MessageCircle size={22} /> Falar no WhatsApp
+          </RippleButton>
+        </div>
       </motion.div>
     </div>
   </section>
