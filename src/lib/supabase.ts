@@ -14,6 +14,22 @@ export type LeadStatus =
   | 'ganho'
   | 'perdido'
 
+export type AtividadeTipo = 'ligacao' | 'whatsapp' | 'email' | 'reuniao' | 'outro'
+
+export interface Atividade {
+  id: string
+  lead_id: string
+  tipo: AtividadeTipo
+  titulo: string
+  descricao: string | null
+  prazo: string | null
+  concluida: boolean
+  concluida_em: string | null
+  created_at: string
+  // joined
+  lead_nome?: string
+}
+
 export interface Lead {
   id: string
   nome: string

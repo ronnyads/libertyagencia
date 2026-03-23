@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   RefreshCw, LogOut, Copy, ExternalLink, Lock, ChevronRight,
   Kanban, Users, Briefcase, CheckSquare, BarChart2, UserCircle,
   Search, Filter, Download, Plus, X, PhoneCall,
+  Phone, MessageCircle, Mail, Circle, Check, Trash2, AlertTriangle, Calendar, Clock,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +15,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useLeads, useUpdateLeadStatus, useUpdateLead } from '@/hooks/useLeads'
 import { useCreateLead } from '@/hooks/useCreateLead'
-import type { Lead, LeadStatus } from '@/lib/supabase'
+import { useAtividades, useCreateAtividade, useConcluirAtividade, useReabrirAtividade, useDeleteAtividade } from '@/hooks/useAtividades'
+import type { Lead, LeadStatus, Atividade, AtividadeTipo } from '@/lib/supabase'
 
 // ─── Pipeline config ──────────────────────────────────────────────────────────
 
@@ -105,7 +107,7 @@ const NAV_ITEMS = [
   { id: 'pipeline',   label: 'Pipeline',   icon: Kanban,       active: true },
   { id: 'contatos',   label: 'Contatos',   icon: Users,        active: true },
   { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: true },
-  { id: 'atividades', label: 'Atividades', icon: CheckSquare,  active: false },
+  { id: 'atividades', label: 'Atividades', icon: CheckSquare,  active: true },
   { id: 'relatorios', label: 'Relatórios', icon: BarChart2,    active: false },
 ]
 
@@ -953,6 +955,385 @@ function NegociosView({ leads, isLoading, onOpen }: {
   )
 }
 
+// ─── Atividades ───────────────────────────────────────────────────────────────
+
+const TIPO_CONFIG: Record<AtividadeTipo, { icon: React.ElementType; label: string; color: string; bg: string }> = {
+  ligacao:  { icon: Phone,         label: 'Ligação',  color: 'text-blue-400',   bg: 'bg-blue-500/10 border-blue-500/20'   },
+  whatsapp: { icon: MessageCircle, label: 'WhatsApp', color: 'text-green-400',  bg: 'bg-green-500/10 border-green-500/20'  },
+  email:    { icon: Mail,          label: 'E-mail',   color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+  reuniao:  { icon: Users,         label: 'Reunião',  color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+  outro:    { icon: Circle,        label: 'Outro',    color: 'text-gray-400',   bg: 'bg-gray-500/10 border-gray-500/20'   },
+}
+
+function formatPrazo(prazo: string | null): string {
+  if (!prazo) return 'Sem prazo'
+  const d = new Date(prazo)
+  const now = new Date()
+  const diffMs = d.getTime() - now.getTime()
+  const diffH = Math.floor(diffMs / 3600000)
+  const diffD = Math.floor(diffMs / 86400000)
+  if (diffMs < 0) {
+    const atrasoH = Math.abs(diffH)
+    const atrasoD = Math.abs(diffD)
+    if (atrasoD > 0) return `${atrasoD}d atrasada`
+    return `${atrasoH}h atrasada`
+  }
+  if (diffD === 0) return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  if (diffD === 1) return 'Amanhã ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  if (diffD < 7) return `Em ${diffD} dias`
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+}
+
+function grupoAtividade(prazo: string | null): 'atrasada' | 'hoje' | 'proximos' | 'sem_prazo' {
+  if (!prazo) return 'sem_prazo'
+  const d = new Date(prazo)
+  const agora = new Date()
+  const inicioHoje = new Date(agora); inicioHoje.setHours(0, 0, 0, 0)
+  const fimHoje = new Date(agora); fimHoje.setHours(23, 59, 59, 999)
+  if (d < inicioHoje) return 'atrasada'
+  if (d <= fimHoje) return 'hoje'
+  return 'proximos'
+}
+
+function NovaAtividadeModal({ open, onClose, leads }: {
+  open: boolean
+  onClose: () => void
+  leads: Lead[]
+}) {
+  const create = useCreateAtividade()
+  const [leadId, setLeadId] = useState('')
+  const [leadSearch, setLeadSearch] = useState('')
+  const [tipo, setTipo] = useState<AtividadeTipo>('whatsapp')
+  const [titulo, setTitulo] = useState('')
+  const [descricao, setDescricao] = useState('')
+  const [prazo, setPrazo] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const leadsFiltered = useMemo(() =>
+    leads.filter((l) => l.nome.toLowerCase().includes(leadSearch.toLowerCase())).slice(0, 6),
+    [leads, leadSearch]
+  )
+
+  const selectedLead = leads.find((l) => l.id === leadId)
+
+  const handleSubmit = async () => {
+    const errs: Record<string, string> = {}
+    if (!leadId) errs.lead = 'Selecione um lead'
+    if (!titulo.trim()) errs.titulo = 'Título obrigatório'
+    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    await create.mutateAsync({ lead_id: leadId, tipo, titulo: titulo.trim(), descricao, prazo: prazo ? new Date(prazo).toISOString() : undefined })
+    setLeadId(''); setLeadSearch(''); setTipo('whatsapp'); setTitulo(''); setDescricao(''); setPrazo(''); setErrors({})
+    onClose()
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="bg-card border-foreground/15 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-orbitron text-lg">Nova Atividade</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          {/* Lead selector */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Lead *</label>
+            {selectedLead ? (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5">
+                <span className="text-sm text-foreground font-medium flex-1">{selectedLead.nome}</span>
+                <button onClick={() => { setLeadId(''); setLeadSearch('') }} className="text-muted-foreground hover:text-foreground">
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={leadSearch}
+                  onChange={(e) => setLeadSearch(e.target.value)}
+                  placeholder="Buscar lead..."
+                  className="pl-8 bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground"
+                />
+                {leadSearch && leadsFiltered.length > 0 && (
+                  <div className="absolute top-full mt-1 w-full bg-card border border-foreground/15 rounded-lg shadow-lg z-50 overflow-hidden">
+                    {leadsFiltered.map((l) => (
+                      <button key={l.id} onClick={() => { setLeadId(l.id); setLeadSearch('') }}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-primary/10 transition-colors">
+                        {l.nome} <span className="text-muted-foreground text-xs ml-1">{l.whatsapp}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {errors.lead && <p className="text-red-400 text-xs mt-1">{errors.lead}</p>}
+          </div>
+
+          {/* Tipo */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-2 block">Tipo</label>
+            <div className="grid grid-cols-5 gap-2">
+              {(Object.keys(TIPO_CONFIG) as AtividadeTipo[]).map((t) => {
+                const cfg = TIPO_CONFIG[t]
+                const Icon = cfg.icon
+                return (
+                  <button key={t} onClick={() => setTipo(t)}
+                    className={`flex flex-col items-center gap-1 py-2 rounded-lg border text-xs transition-all ${
+                      tipo === t ? `${cfg.bg} ${cfg.color} border-current` : 'border-foreground/15 text-muted-foreground hover:border-foreground/30'
+                    }`}>
+                    <Icon size={16} />
+                    <span className="text-[10px]">{cfg.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Título */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Título *</label>
+            <Input value={titulo} onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Ex: Follow-up sobre proposta"
+              className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground" />
+            {errors.titulo && <p className="text-red-400 text-xs mt-1">{errors.titulo}</p>}
+          </div>
+
+          {/* Descrição */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Descrição <span className="text-muted-foreground/50">(opcional)</span></label>
+            <Textarea value={descricao} onChange={(e) => setDescricao(e.target.value)}
+              placeholder="Detalhes adicionais..." rows={2}
+              className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground text-sm resize-none" />
+          </div>
+
+          {/* Prazo */}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Prazo <span className="text-muted-foreground/50">(opcional)</span></label>
+            <input type="datetime-local" value={prazo} onChange={(e) => setPrazo(e.target.value)}
+              className="w-full px-3 py-2 rounded-md border border-foreground/15 bg-background/50 text-foreground text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]" />
+          </div>
+
+          <button onClick={handleSubmit} disabled={create.isPending}
+            className="neon-button w-full py-3 font-bold disabled:opacity-60">
+            {create.isPending ? 'Criando...' : 'Criar Atividade'}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function AtividadeCard({ ativ, onConcluir, onReabrir, onDelete }: {
+  ativ: Atividade
+  onConcluir: (id: string) => void
+  onReabrir: (id: string) => void
+  onDelete: (id: string) => void
+}) {
+  const cfg = TIPO_CONFIG[ativ.tipo]
+  const Icon = cfg.icon
+  const grupo = grupoAtividade(ativ.prazo)
+  const atrasada = grupo === 'atrasada'
+
+  return (
+    <div className={`flex items-start gap-3 p-4 rounded-xl border transition-colors ${
+      ativ.concluida
+        ? 'border-foreground/5 bg-foreground/[0.02] opacity-60'
+        : atrasada
+          ? 'border-red-500/20 bg-red-500/5'
+          : 'border-foreground/8 bg-card/20 hover:border-foreground/20'
+    }`}>
+      {/* Tipo icon */}
+      <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${cfg.bg}`}>
+        <Icon size={15} className={cfg.color} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <p className={`text-sm font-medium leading-tight ${ativ.concluida ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+            {ativ.titulo}
+          </p>
+          {atrasada && !ativ.concluida && (
+            <AlertTriangle size={14} className="text-red-400 shrink-0 mt-0.5" />
+          )}
+        </div>
+        <p className="text-xs text-primary mt-0.5">{ativ.lead_nome}</p>
+        {ativ.descricao && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ativ.descricao}</p>}
+        <div className="flex items-center gap-3 mt-2">
+          {ativ.prazo && (
+            <span className={`flex items-center gap-1 text-[11px] ${atrasada && !ativ.concluida ? 'text-red-400' : 'text-muted-foreground'}`}>
+              <Clock size={10} /> {formatPrazo(ativ.prazo)}
+            </span>
+          )}
+          {ativ.concluida && ativ.concluida_em && (
+            <span className="flex items-center gap-1 text-[11px] text-emerald-400">
+              <Check size={10} /> {new Date(ativ.concluida_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-1 shrink-0">
+        {!ativ.concluida ? (
+          <button onClick={() => onConcluir(ativ.id)}
+            className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 px-2 py-1 rounded-md transition-colors">
+            <Check size={11} /> Concluir
+          </button>
+        ) : (
+          <button onClick={() => onReabrir(ativ.id)}
+            className="text-[11px] text-muted-foreground hover:text-foreground border border-foreground/15 hover:border-foreground/30 px-2 py-1 rounded-md transition-colors">
+            Reabrir
+          </button>
+        )}
+        <button onClick={() => onDelete(ativ.id)}
+          className="p-1.5 text-muted-foreground/40 hover:text-red-400 transition-colors rounded-md hover:bg-red-500/10">
+          <Trash2 size={13} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function AtividadesView({ leads, isLoadingLeads }: { leads: Lead[]; isLoadingLeads: boolean }) {
+  const { data: atividades = [], isLoading } = useAtividades()
+  const concluir = useConcluirAtividade()
+  const reabrir = useReabrirAtividade()
+  const deletar = useDeleteAtividade()
+  const [tab, setTab] = useState<'pendentes' | 'concluidas'>('pendentes')
+  const [novaOpen, setNovaOpen] = useState(false)
+
+  const pendentes = useMemo(() => atividades.filter((a) => !a.concluida), [atividades])
+  const concluidas = useMemo(() => atividades.filter((a) => a.concluida).sort((a, b) =>
+    new Date(b.concluida_em ?? 0).getTime() - new Date(a.concluida_em ?? 0).getTime()
+  ), [atividades])
+
+  const agora = new Date()
+  const fimHoje = new Date(agora); fimHoje.setHours(23, 59, 59, 999)
+  const fimSemana = new Date(agora); fimSemana.setDate(fimSemana.getDate() + 7)
+
+  const atrasadas = pendentes.filter((a) => a.prazo && new Date(a.prazo) < new Date(new Date().setHours(0, 0, 0, 0)))
+  const hoje = pendentes.filter((a) => {
+    if (!a.prazo) return false
+    const d = new Date(a.prazo)
+    return d >= new Date(new Date().setHours(0, 0, 0, 0)) && d <= fimHoje
+  })
+  const proximos7 = pendentes.filter((a) => {
+    if (!a.prazo) return false
+    const d = new Date(a.prazo)
+    return d > fimHoje && d <= fimSemana
+  })
+
+  // Groups for pending tab
+  const grupos = [
+    { id: 'atrasada', label: 'Atrasadas', icon: AlertTriangle, color: 'text-red-400', items: atrasadas },
+    { id: 'hoje', label: 'Hoje', icon: Clock, color: 'text-yellow-400', items: hoje },
+    { id: 'proximos', label: 'Próximos dias', icon: Calendar, color: 'text-blue-400', items: pendentes.filter((a) => grupoAtividade(a.prazo) === 'proximos') },
+    { id: 'sem_prazo', label: 'Sem prazo', icon: Circle, color: 'text-muted-foreground', items: pendentes.filter((a) => !a.prazo) },
+  ]
+
+  const concluidasMes = concluidas.filter((a) => {
+    if (!a.concluida_em) return false
+    const d = new Date(a.concluida_em)
+    return d.getMonth() === agora.getMonth() && d.getFullYear() === agora.getFullYear()
+  })
+
+  return (
+    <div className="flex-1 overflow-auto flex flex-col">
+      {/* KPI Cards */}
+      <div className="px-6 py-4 border-b border-foreground/8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: 'Atrasadas', value: atrasadas.length, sub: 'urgente agora', icon: AlertTriangle, color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/5' },
+            { label: 'Hoje', value: hoje.length, sub: 'pendentes', icon: Clock, color: 'text-yellow-400', border: 'border-yellow-500/20', bg: 'bg-yellow-500/5' },
+            { label: 'Próx. 7 dias', value: proximos7.length, sub: 'agendadas', icon: Calendar, color: 'text-blue-400', border: 'border-blue-500/20', bg: 'bg-blue-500/5' },
+            { label: 'Concluídas', value: concluidasMes.length, sub: 'este mês', icon: Check, color: 'text-emerald-400', border: 'border-emerald-500/20', bg: 'bg-emerald-500/5' },
+          ].map((card) => (
+            <div key={card.label} className={`rounded-xl border ${card.border} ${card.bg} px-4 py-3 flex items-center gap-3`}>
+              <card.icon size={20} className={card.color} />
+              <div>
+                <p className={`font-orbitron font-bold text-xl ${card.color}`}>{card.value}</p>
+                <p className="text-[11px] text-muted-foreground">{card.label} · {card.sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div className="px-6 py-3 border-b border-foreground/8 flex items-center justify-between">
+        <div className="flex gap-1 bg-foreground/5 rounded-lg p-0.5">
+          {(['pendentes', 'concluidas'] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-1.5 rounded-md text-xs font-medium transition-colors capitalize ${
+                tab === t ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}>
+              {t === 'pendentes' ? `Pendentes (${pendentes.length})` : `Concluídas (${concluidas.length})`}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setNovaOpen(true)}
+          className="neon-button h-9 px-4 text-xs font-bold flex items-center gap-1.5">
+          <Plus size={13} /> Nova Atividade
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">Carregando atividades...</div>
+        ) : tab === 'pendentes' ? (
+          pendentes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm gap-2">
+              <CheckSquare size={32} className="opacity-20" />
+              <p>Nenhuma atividade pendente. Tudo em dia!</p>
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-2xl">
+              {grupos.map((grupo) => grupo.items.length > 0 && (
+                <div key={grupo.id}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <grupo.icon size={14} className={grupo.color} />
+                    <span className={`text-xs font-bold uppercase tracking-wider ${grupo.color}`}>
+                      {grupo.label} ({grupo.items.length})
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {grupo.items.map((a) => (
+                      <AtividadeCard key={a.id} ativ={a}
+                        onConcluir={(id) => concluir.mutate(id)}
+                        onReabrir={(id) => reabrir.mutate(id)}
+                        onDelete={(id) => deletar.mutate(id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          concluidas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground text-sm gap-2">
+              <Check size={32} className="opacity-20" />
+              <p>Nenhuma atividade concluída ainda.</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-w-2xl">
+              {concluidas.map((a) => (
+                <AtividadeCard key={a.id} ativ={a}
+                  onConcluir={(id) => concluir.mutate(id)}
+                  onReabrir={(id) => reabrir.mutate(id)}
+                  onDelete={(id) => deletar.mutate(id)}
+                />
+              ))}
+            </div>
+          )
+        )}
+      </div>
+
+      <NovaAtividadeModal open={novaOpen} onClose={() => setNovaOpen(false)} leads={leads} />
+    </div>
+  )
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
@@ -1006,6 +1387,9 @@ function Dashboard() {
         )}
         {view === 'negocios' && (
           <NegociosView leads={leads} isLoading={isLoading} onOpen={handleOpen} />
+        )}
+        {view === 'atividades' && (
+          <AtividadesView leads={leads} isLoadingLeads={isLoading} />
         )}
       </div>
 
