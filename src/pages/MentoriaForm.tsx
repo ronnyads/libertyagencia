@@ -181,8 +181,8 @@ export default function MentoriaForm() {
     } else {
       setZapError('')
     }
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setEmailError('E-mail invalido')
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError('Digite um e-mail valido')
       valid = false
     } else {
       setEmailError('')
@@ -192,7 +192,7 @@ export default function MentoriaForm() {
     await createLead.mutateAsync({
       nome: nome.trim(),
       whatsapp,
-      email: email || undefined,
+      email,
       situacao: answers.situacao ?? '',
       projeto: answers.projeto ?? '',
       nivel_tech: answers.nivel_tech ?? '',
@@ -341,9 +341,7 @@ export default function MentoriaForm() {
                   </div>
 
                   <div>
-                    <label className="text-foreground/80 text-sm block mb-1.5">
-                      E-mail <span className="text-muted-foreground/60">(opcional — para receber confirmacao)</span>
-                    </label>
+                    <label className="text-foreground/80 text-sm block mb-1.5">E-mail *</label>
                     <Input
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
