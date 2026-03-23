@@ -31,3 +31,19 @@ export function useUpdateLeadStatus() {
     },
   })
 }
+
+export function useUpdateLead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, ...fields }: Partial<Lead> & { id: string }) => {
+      const { error } = await supabase
+        .from('leads')
+        .update(fields)
+        .eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] })
+    },
+  })
+}

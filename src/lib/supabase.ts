@@ -5,7 +5,14 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-export type LeadStatus = 'novo' | 'em_contato' | 'qualificado' | 'fechado' | 'perdido'
+export type LeadStatus =
+  | 'novo'
+  | 'em_contato'
+  | 'qualificado'
+  | 'proposta_enviada'
+  | 'negociacao'
+  | 'ganho'
+  | 'perdido'
 
 export interface Lead {
   id: string
@@ -15,5 +22,7 @@ export interface Lead {
   instagram: string | null
   servico_interesse: string | null
   status: LeadStatus
+  observacoes: string | null
+  valor_estimado: number | null
   created_at: string
 }
