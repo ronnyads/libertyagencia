@@ -1,4 +1,5 @@
 import { Instagram, MessageCircle, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => (
   <footer className="py-12 border-t border-foreground/5">
@@ -12,9 +13,9 @@ const Footer = () => (
           <a href="https://instagram.com/euronnyads" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
             <Instagram size={20} />
           </a>
-          <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/form" className="text-muted-foreground hover:text-primary transition-colors">
             <MessageCircle size={20} />
-          </a>
+          </Link>
           <a href="mailto:contato@liberty.agency" className="text-muted-foreground hover:text-primary transition-colors">
             <Mail size={20} />
           </a>

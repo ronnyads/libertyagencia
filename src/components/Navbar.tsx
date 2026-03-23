@@ -65,14 +65,12 @@ const Navbar = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             Projeto Grátis
           </Link>
-          <a
-            href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/form"
             className="neon-button px-5 py-2 text-sm flex items-center gap-2"
           >
             <MessageCircle size={16} /> Falar Agora
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -98,14 +96,13 @@ const Navbar = () => {
               {l.label}
             </a>
           ))}
-          <a
-            href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to="/form"
             className="neon-button px-5 py-2.5 text-sm flex items-center justify-center gap-2 mt-3 w-full"
+            onClick={() => setMobileOpen(false)}
           >
             <MessageCircle size={16} /> Falar Agora
-          </a>
+          </Link>
         </div>
       )}
     </nav>

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useSearchParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, ArrowLeft, Zap, Shield, Clock, MessageCircle } from 'lucide-react'
+import { CheckCircle, ArrowLeft, Zap, Shield, Clock } from 'lucide-react'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -60,16 +60,8 @@ function SuccessScreen() {
         Nossa equipe vai analisar seu negócio e entrar em contato em até 24h.
       </p>
       <p className="text-muted-foreground text-sm mb-8 max-w-sm">
-        Enquanto isso, entre no nosso grupo VIP e receba conteúdos exclusivos sobre IA.
+        Nossa equipe vai entrar em contato via WhatsApp em até 24h.
       </p>
-      <a
-        href="https://chat.whatsapp.com/LINK_DO_GRUPO_AQUI"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="neon-button px-8 py-3.5 flex items-center gap-2 text-base font-bold mb-6"
-      >
-        <MessageCircle size={20} /> Entrar no Grupo VIP
-      </a>
       <Link to="/" className="text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center gap-1">
         <ArrowLeft size={14} /> Voltar ao site
       </Link>

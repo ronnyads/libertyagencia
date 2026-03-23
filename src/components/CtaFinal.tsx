@@ -51,22 +51,12 @@ const CtaFinal = () => (
           Empresas que adotam IA agora têm 3x mais eficiência em 90 dias. As que esperam, perdem espaço todo mês.
         </motion.p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            to="/form"
-            className="neon-button px-10 py-4 text-lg inline-flex items-center justify-center gap-3"
-          >
-            <ArrowRight size={22} /> Garantir Projeto Gratuito
-          </Link>
-          <RippleButton
-            href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="neon-button-outline px-10 py-4 text-lg inline-flex items-center justify-center gap-3"
-          >
-            <MessageCircle size={22} /> Falar no WhatsApp
-          </RippleButton>
-        </div>
+        <Link
+          to="/form"
+          className="neon-button px-10 py-4 text-lg inline-flex items-center justify-center gap-3"
+        >
+          <ArrowRight size={22} /> Garantir Projeto Gratuito
+        </Link>
       </motion.div>
     </div>
   </section>

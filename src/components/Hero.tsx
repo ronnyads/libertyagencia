@@ -97,14 +97,12 @@ const Hero = () => (
         transition={{ duration: 0.6, delay: 0.9 }}
         className="flex flex-col sm:flex-row gap-4 justify-center"
       >
-        <a
-          href="https://wa.me/5511999999999?text=Olá, quero iniciar um projeto de IA."
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to="/form"
           className="neon-button px-8 py-4 text-base flex items-center justify-center gap-2"
         >
           <MessageCircle size={20} /> Começar Projeto com IA
-        </a>
+        </Link>
         <a
           href="https://instagram.com/euronnyads"
           target="_blank"
