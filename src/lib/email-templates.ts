@@ -68,7 +68,7 @@ export function templateDemoGratuita(nome: string, whatsapp: string): { subject:
             <td style="padding:24px 40px;border-top:1px solid #1e1e1e;background-color:#0d0d0d;">
               <p style="margin:0;font-size:12px;color:#444444;line-height:1.6;">
                 Equipe Liberty Agencia &mdash; Especialistas em IA para negocios<br />
-                Voce recebeu este e-mail porque se cadastrou em libertyagencia.com.br
+                Voce recebeu este e-mail porque se cadastrou em adsliberty.com
               </p>
             </td>
           </tr>
@@ -152,7 +152,7 @@ export function templateMentoria(nome: string, whatsapp: string): { subject: str
             <td style="padding:24px 40px;border-top:1px solid #1e1e1e;background-color:#0d0d0d;">
               <p style="margin:0;font-size:12px;color:#444444;line-height:1.6;">
                 Equipe Liberty Agencia &mdash; Mentoria 1:1 em IA e tecnologia<br />
-                Voce recebeu este e-mail porque se candidatou em libertyagencia.com.br
+                Voce recebeu este e-mail porque se candidatou em adsliberty.com
               </p>
             </td>
           </tr>

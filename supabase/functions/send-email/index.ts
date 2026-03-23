@@ -35,7 +35,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Liberty Agencia <contato@libertyagencia.com.br>',
+        from: 'Liberty Agencia <contato@adsliberty.com>',
         to: [to],
         subject,
         html,
