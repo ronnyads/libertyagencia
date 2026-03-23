@@ -126,7 +126,7 @@ export function templateMentoria(nome: string, whatsapp: string): { subject: str
                 <tr>
                   <td style="padding:0 0 12px;">
                     <p style="margin:0;font-size:14px;color:#666666;">
-                      <span style="color:#00d4ff;margin-right:8px;">✓</span> Calls ao vivo semanais
+                      <span style="color:#00d4ff;margin-right:8px;">✓</span> 1 call ao vivo por semana
                     </p>
                   </td>
                 </tr>
