@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useLeads, useUpdateLeadStatus, useUpdateLead } from '@/hooks/useLeads'
 import { useCreateLead } from '@/hooks/useCreateLead'
 import { useAtividades, useCreateAtividade, useConcluirAtividade, useReabrirAtividade, useDeleteAtividade } from '@/hooks/useAtividades'
+import { supabase } from '@/lib/supabase'
 import type { Lead, LeadStatus, Atividade, AtividadeTipo } from '@/lib/supabase'
 
 // ─── Pipeline config ──────────────────────────────────────────────────────────
