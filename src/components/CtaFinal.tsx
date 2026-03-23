@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import AnimatedHeading from "./ui/AnimatedHeading";
+import RippleButton from "./ui/RippleButton";
 
 const CtaFinal = () => (
   <section className="py-32 relative overflow-hidden">
@@ -12,28 +14,50 @@ const CtaFinal = () => (
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
       >
-        <span className="inline-block border border-primary/30 bg-primary/10 text-primary text-xs uppercase tracking-widest px-4 py-1.5 rounded-full animate-pulse-neon mb-8">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="inline-block border border-primary/30 bg-primary/10 text-primary text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-8"
+        >
           Não espere mais
-        </span>
+        </motion.span>
 
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-orbitron font-black uppercase leading-tight mb-6 max-w-3xl mx-auto">
-          O futuro não espera.
+          <AnimatedHeading text="O futuro não espera." />
           <br />
-          <span className="neon-text">Sua empresa também não.</span>
+          <span className="neon-text">
+            <AnimatedHeading text="Sua empresa também não." delay={0.15} />
+          </span>
         </h2>
 
-        <p className="text-muted-foreground mb-10 max-w-lg mx-auto">
-          Domine a tecnologia ou seja substituído por ela. Fale com a gente agora e comece a transformar seu negócio.
-        </p>
+        <motion.div
+          className="h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent mb-8 max-w-xs mx-auto"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, delay: 0.5 }}
+        />
 
-        <a
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="text-muted-foreground mb-10 max-w-lg mx-auto"
+        >
+          Domine a tecnologia ou seja substituído por ela. Fale com a gente agora e comece a transformar seu negócio.
+        </motion.p>
+
+        <RippleButton
           href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
           target="_blank"
           rel="noopener noreferrer"
           className="neon-button px-10 py-4 text-lg inline-flex items-center gap-3"
         >
           <MessageCircle size={22} /> Falar com a Liberty
-        </a>
+        </RippleButton>
       </motion.div>
     </div>
   </section>

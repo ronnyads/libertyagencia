@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check, MessageCircle, Users, Video, Clock, Headphones } from "lucide-react";
+import AnimatedHeading from "./ui/AnimatedHeading";
 
 const checklist = [
   "Aprenda a construir SaaS do zero com IA",
@@ -27,18 +28,32 @@ const Mentoria = () => (
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-orbitron font-bold uppercase mb-6">
-            Mentoria <span className="neon-text">1:1</span>
+          <h2 className="text-3xl md:text-4xl font-orbitron font-bold uppercase mb-3">
+            <AnimatedHeading text="Mentoria" /> <span className="neon-text"><AnimatedHeading text="1:1" delay={0.1} /></span>
           </h2>
+          <motion.div
+            className="h-px bg-gradient-to-r from-primary/60 via-primary/30 to-transparent mb-6 max-w-[200px]"
+            initial={{ scaleX: 0, originX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, delay: 0.4 }}
+          />
           <p className="text-muted-foreground mb-8 leading-relaxed">
             Aprenda diretamente com quem já construiu dezenas de projetos com IA. Mentoria individual, intensiva e focada no seu resultado.
           </p>
           <ul className="space-y-3 mb-8">
             {checklist.map((item, i) => (
-              <li key={i} className="flex items-center gap-3 text-sm">
+              <motion.li
+                key={i}
+                initial={{ opacity: 0, x: -12 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07 }}
+                className="flex items-center gap-3 text-sm"
+              >
                 <Check className="text-primary shrink-0" size={18} />
                 <span className="text-foreground/90">{item}</span>
-              </li>
+              </motion.li>
             ))}
           </ul>
           <a
@@ -65,10 +80,17 @@ const Mentoria = () => (
 
           <div className="space-y-4 mb-8">
             {features.map((f, i) => (
-              <div key={i} className="flex items-center gap-3 text-sm">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-3 text-sm"
+              >
                 <f.icon className="text-primary shrink-0" size={20} />
                 <span className="text-foreground/90">{f.label}</span>
-              </div>
+              </motion.div>
             ))}
           </div>
 

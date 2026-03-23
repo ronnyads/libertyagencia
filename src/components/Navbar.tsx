@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { useScrollSpy } from "@/hooks/useScrollSpy";
 
 const navLinks = [
-  { label: "Serviços", href: "#servicos" },
-  { label: "Mentoria", href: "#mentoria" },
-  { label: "Resultados", href: "#resultados" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Serviços", href: "#servicos", id: "servicos" },
+  { label: "Mentoria", href: "#mentoria", id: "mentoria" },
+  { label: "Resultados", href: "#resultados", id: "resultados" },
+  { label: "FAQ", href: "#faq", id: "faq" },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const activeId = useScrollSpy(navLinks.map((l) => l.id));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -32,11 +35,28 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((l) => (
-            <a key={l.href} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              {l.label}
-            </a>
-          ))}
+          {navLinks.map((l) => {
+            const isActive = activeId === l.id;
+            return (
+              <a
+                key={l.href}
+                href={l.href}
+                className="relative text-sm transition-colors"
+                style={{ color: isActive ? "hsl(190 100% 50%)" : undefined }}
+              >
+                <span className={isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}>
+                  {l.label}
+                </span>
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-indicator"
+                    className="absolute -bottom-1 left-0 right-0 h-px bg-primary"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </a>
+            );
+          })}
           <a
             href="https://wa.me/5511999999999?text=Olá, vim pelo site e quero saber mais sobre a Liberty."
             target="_blank"
@@ -62,7 +82,9 @@ const Navbar = () => {
             <a
               key={l.href}
               href={l.href}
-              className="block py-3 text-muted-foreground hover:text-foreground transition-colors"
+              className={`block py-3 transition-colors ${
+                activeId === l.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
               onClick={() => setMobileOpen(false)}
             >
               {l.label}

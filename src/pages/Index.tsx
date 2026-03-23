@@ -1,27 +1,33 @@
+import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Problema from "@/components/Problema";
-import Servicos from "@/components/Servicos";
-import Diferenciais from "@/components/Diferenciais";
-import Resultados from "@/components/Resultados";
-import Mentoria from "@/components/Mentoria";
-import Faq from "@/components/Faq";
-import CtaFinal from "@/components/CtaFinal";
-import Footer from "@/components/Footer";
+
+const Problema = lazy(() => import("@/components/Problema"));
+const Servicos = lazy(() => import("@/components/Servicos"));
+const Diferenciais = lazy(() => import("@/components/Diferenciais"));
+const Resultados = lazy(() => import("@/components/Resultados"));
+const Mentoria = lazy(() => import("@/components/Mentoria"));
+const Faq = lazy(() => import("@/components/Faq"));
+const CtaFinal = lazy(() => import("@/components/CtaFinal"));
+const Footer = lazy(() => import("@/components/Footer"));
+
+const Fallback = () => <div className="h-32 bg-background" />;
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <Hero />
-      <Problema />
-      <Servicos />
-      <Diferenciais />
-      <Resultados />
-      <Mentoria />
-      <Faq />
-      <CtaFinal />
-      <Footer />
+      <Suspense fallback={<Fallback />}>
+        <Problema />
+        <Servicos />
+        <Diferenciais />
+        <Resultados />
+        <Mentoria />
+        <Faq />
+        <CtaFinal />
+        <Footer />
+      </Suspense>
     </div>
   );
 };
