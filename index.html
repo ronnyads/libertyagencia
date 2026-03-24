@@ -36,6 +36,24 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
       />
     </noscript>
+  <!-- Meta Pixel (dynamic) -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fetch('https://oocnnimhhffvirkiyiev.supabase.co/rest/v1/configuracoes?id=eq.meta_pixel_id&select=valor',{
+      headers:{
+        'apikey':'sb_publishable_TGQnnCaArk52WR4PoFW7Tg_WurdB4n2',
+        'Authorization':'Bearer sb_publishable_TGQnnCaArk52WR4PoFW7Tg_WurdB4n2'
+      }
+    }).then(function(r){return r.json()}).then(function(d){
+      var pixelId = d && d[0] && d[0].valor;
+      if(pixelId){fbq('init',pixelId);fbq('track','PageView');}
+    }).catch(function(){});
+  </script>
+  <!-- End Meta Pixel -->
   </head>
   <body>
     <div id="root"></div>

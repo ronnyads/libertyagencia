@@ -10,6 +10,9 @@ export interface CreateLeadData {
   email?: string
   instagram?: string
   servico_interesse?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
 }
 
 export function useCreateLead() {
@@ -22,6 +25,9 @@ export function useCreateLead() {
         email: data.email || null,
         instagram: data.instagram || null,
         servico_interesse: data.servico_interesse || null,
+        utm_source: data.utm_source || null,
+        utm_medium: data.utm_medium || null,
+        utm_campaign: data.utm_campaign || null,
         status: 'novo',
       }])
       if (error) throw error

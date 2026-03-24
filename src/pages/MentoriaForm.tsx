@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
@@ -135,6 +135,7 @@ function SuccessScreen({ temInvestimento }: { temInvestimento: string }) {
 }
 
 export default function MentoriaForm() {
+  const [searchParams] = useSearchParams()
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -199,7 +200,13 @@ export default function MentoriaForm() {
       objetivo: answers.objetivo ?? '',
       horas_semana: answers.horas_semana ?? '',
       tem_investimento: answers.tem_investimento ?? '',
+      utm_source: searchParams.get('utm_source') || undefined,
+      utm_medium: searchParams.get('utm_medium') || undefined,
+      utm_campaign: searchParams.get('utm_campaign') || undefined,
     })
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead')
+    }
     setSubmitted(true)
   }
 

@@ -13,6 +13,9 @@ export interface MentoriaLeadData {
   objetivo: string
   horas_semana: string
   tem_investimento: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
 }
 
 export function useCreateMentoriaLead() {

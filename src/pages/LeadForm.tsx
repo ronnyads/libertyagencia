@@ -98,7 +98,15 @@ export default function LeadForm() {
   }, [servicoParam])
 
   const onSubmit = async (data: FormValues) => {
-    await createLead.mutateAsync(data)
+    await createLead.mutateAsync({
+      ...data,
+      utm_source: searchParams.get('utm_source') || undefined,
+      utm_medium: searchParams.get('utm_medium') || undefined,
+      utm_campaign: searchParams.get('utm_campaign') || undefined,
+    })
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead')
+    }
     setSubmitted(true)
   }
 

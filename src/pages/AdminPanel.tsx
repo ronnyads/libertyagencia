@@ -619,7 +619,7 @@ function ContatosView({ leads, isLoading, onOpen }: {
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-card/90 backdrop-blur-sm border-b border-foreground/8 z-10">
               <tr>
-                {['Nome', 'WhatsApp', 'Faturamento', 'Serviço', 'Status', 'Valor', 'Criado em', ''].map((h) => (
+                {['Nome', 'WhatsApp', 'Faturamento', 'Serviço', 'Status', 'Origem', 'Valor', 'Criado em', ''].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] text-muted-foreground uppercase tracking-wider font-medium whitespace-nowrap">
                     {h}
                   </th>
@@ -676,6 +676,14 @@ function ContatosView({ leads, isLoading, onOpen }: {
                       <span className={`inline-flex items-center text-[11px] px-2 py-0.5 rounded-full border whitespace-nowrap ${cfg.badge}`}>
                         {cfg.label}
                       </span>
+                    </td>
+
+                    {/* Origem */}
+                    <td className="px-4 py-3 text-xs whitespace-nowrap">
+                      {lead.utm_source
+                        ? <span className="capitalize text-primary/80 font-medium">{lead.utm_source}</span>
+                        : <span className="text-muted-foreground/40">—</span>
+                      }
                     </td>
 
                     {/* Valor */}
@@ -1437,6 +1445,69 @@ const INTEGRATIONS = [
   },
 ]
 
+function MetaPixelCard() {
+  const [pixelId, setPixelId] = useState('')
+  const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    supabase.from('configuracoes').select('valor').eq('id', 'meta_pixel_id').single()
+      .then(({ data }) => { if (data?.valor) setPixelId(data.valor) })
+  }, [])
+
+  const handleSave = async () => {
+    setLoading(true)
+    await supabase.from('configuracoes').upsert({ id: 'meta_pixel_id', valor: pixelId.trim() })
+    setLoading(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const isConnected = pixelId.trim().length > 0
+
+  return (
+    <div className="bg-card border border-foreground/10 rounded-xl p-5 flex flex-col gap-4">
+      <div className="flex items-start justify-between">
+        <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Link2 size={18} className="text-primary" />
+        </div>
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+          isConnected
+            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+        }`}>
+          {isConnected ? 'Conectado' : 'Não configurado'}
+        </span>
+      </div>
+      <div>
+        <p className="font-semibold text-foreground text-sm mb-1">Meta Pixel</p>
+        <p className="text-muted-foreground text-xs leading-relaxed">Rastreia conversões do formulário para otimizar campanhas de anúncios no Meta Ads.</p>
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={pixelId}
+          onChange={(e) => setPixelId(e.target.value)}
+          placeholder="Pixel ID (ex: 1234567890)"
+          className="flex-1 text-xs bg-background/50 border border-foreground/15 rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60"
+        />
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="text-xs px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50 shrink-0"
+        >
+          {saved ? <Check size={14} /> : loading ? '...' : 'Salvar'}
+        </button>
+      </div>
+      <div className="pt-1 border-t border-foreground/8">
+        <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener noreferrer"
+          className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
+          Events Manager <ExternalLink size={11} />
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function IntegracoesView() {
   return (
     <div className="p-8 max-w-4xl">
@@ -1463,26 +1534,21 @@ function IntegracoesView() {
                   {isConnected ? 'Conectado' : 'Não configurado'}
                 </span>
               </div>
-
               <div>
                 <p className="font-semibold text-foreground text-sm mb-1">{integration.name}</p>
                 <p className="text-muted-foreground text-xs leading-relaxed">{integration.description}</p>
               </div>
-
               <div className="mt-auto pt-3 border-t border-foreground/8 flex items-center justify-between">
                 <span className="text-xs text-muted-foreground font-mono truncate max-w-[120px]">{integration.detail}</span>
-                <a
-                  href={integration.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors shrink-0"
-                >
+                <a href={integration.href} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors shrink-0">
                   {integration.linkLabel} <ExternalLink size={11} />
                 </a>
               </div>
             </div>
           )
         })}
+        <MetaPixelCard />
       </div>
     </div>
   )
