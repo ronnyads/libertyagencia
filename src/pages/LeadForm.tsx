@@ -183,39 +183,6 @@ export default function LeadForm() {
 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {/* Checkbox de Termo — ANTES dos campos */}
-                    <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
-                      <FormField
-                        control={form.control}
-                        name="aceite_termo"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start gap-3 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value === true}
-                                onCheckedChange={field.onChange}
-                                className="mt-0.5 border-primary/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel className="text-sm text-foreground/80 font-normal leading-relaxed cursor-pointer">
-                                Li e aceito o{' '}
-                                <button
-                                  type="button"
-                                  onClick={() => setTermoOpen(true)}
-                                  className="text-primary underline underline-offset-2 hover:text-primary/80"
-                                >
-                                  Termo de Visualização de Demo
-                                </button>
-                                {' '}— entendo que é apenas uma demo online, sem download de arquivos, e que a compra é opcional.
-                              </FormLabel>
-                              <FormMessage />
-                            </div>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
                     <FormField
                       control={form.control}
                       name="nome"
@@ -326,11 +293,6 @@ export default function LeadForm() {
                       )}
                     />
 
-                    {!form.watch('aceite_termo') && (
-                      <p className="text-center text-xs text-primary font-medium animate-pulse">
-                        ↑ Aceite o termo acima para continuar
-                      </p>
-                    )}
                     <button
                       type="submit"
                       disabled={createLead.isPending || !form.watch('aceite_termo')}
@@ -338,6 +300,39 @@ export default function LeadForm() {
                     >
                       {createLead.isPending ? 'Enviando...' : 'Garantir Minha Demo Gratuita →'}
                     </button>
+
+                    {/* Checkbox de Termo — ABAIXO do botão */}
+                    <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
+                      <FormField
+                        control={form.control}
+                        name="aceite_termo"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start gap-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value === true}
+                                onCheckedChange={field.onChange}
+                                className="mt-0.5 border-primary/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm text-foreground/80 font-normal leading-relaxed cursor-pointer">
+                                Li e aceito o{' '}
+                                <button
+                                  type="button"
+                                  onClick={() => setTermoOpen(true)}
+                                  className="text-primary underline underline-offset-2 hover:text-primary/80"
+                                >
+                                  Termo de Visualização de Demo
+                                </button>
+                                {' '}— entendo que é apenas uma demo online, sem download de arquivos, e que a compra é opcional.
+                              </FormLabel>
+                              <FormMessage />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <p className="text-center text-xs text-muted-foreground">
                       Ao enviar, você concorda em receber contato da Liberty Agência via WhatsApp.
