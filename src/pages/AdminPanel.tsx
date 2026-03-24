@@ -1433,16 +1433,6 @@ const INTEGRATIONS = [
     href: 'https://supabase.com/dashboard/project/oocnnimhhffvirkiyiev',
     linkLabel: 'Ver painel',
   },
-  {
-    id: 'meta_pixel',
-    name: 'Meta Pixel',
-    icon: Link2,
-    status: 'pending' as const,
-    description: 'Rastreia conversões do formulário para otimizar campanhas de anúncios no Meta Ads.',
-    detail: 'Pixel ID não configurado',
-    href: 'https://www.facebook.com/business/help/952192354843755',
-    linkLabel: 'Como configurar',
-  },
 ]
 
 function MetaPixelCard() {
