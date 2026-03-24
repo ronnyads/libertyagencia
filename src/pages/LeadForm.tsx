@@ -12,21 +12,23 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCreateLead } from '@/hooks/useCreateLead'
 
-const faturamentoOptions = [
-  'Ainda não faturei',
-  'Até R$5k/mês',
-  'R$5k a R$20k/mês',
-  'R$20k a R$50k/mês',
-  'Acima de R$50k/mês',
+const segmentoOptions = [
+  'Loja / E-commerce',
+  'Clínica / Saúde',
+  'Restaurante / Food',
+  'Prestador de serviço',
+  'Infoproduto / Digital',
+  'Indústria / B2B',
+  'Outro',
 ] as const
 
 const schema = z.object({
   aceite_termo: z.literal(true, { errorMap: () => ({ message: 'Você precisa aceitar os termos para continuar' }) }),
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   whatsapp: z.string().regex(/^\(\d{2}\)\s\d{4,5}-\d{4}$/, 'Formato: (11) 99999-9999'),
-  faturamento: z.enum(faturamentoOptions, { required_error: 'Selecione uma opção' }),
+  faturamento: z.enum(segmentoOptions, { required_error: 'Selecione uma opção' }),
   email: z.string().email('E-mail invalido').min(1, 'E-mail obrigatorio'),
-  instagram: z.string().optional(),
+  instagram: z.string().min(1, 'Instagram é obrigatório'),
   servico_interesse: z.string().optional(),
 })
 
@@ -277,7 +279,7 @@ export default function LeadForm() {
                       name="faturamento"
                       render={() => (
                         <FormItem>
-                          <FormLabel className="text-foreground/80 text-sm">Faturamento mensal *</FormLabel>
+                          <FormLabel className="text-foreground/80 text-sm">Segmento do negócio *</FormLabel>
                           <Controller
                             control={form.control}
                             name="faturamento"
@@ -285,11 +287,11 @@ export default function LeadForm() {
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger className="bg-background/50 border-foreground/15 focus:border-primary/60 text-foreground">
-                                    <SelectValue placeholder="Selecione uma opção" />
+                                    <SelectValue placeholder="Qual é o seu negócio?" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="bg-card border-foreground/15">
-                                  {faturamentoOptions.map((opt) => (
+                                  {segmentoOptions.map((opt) => (
                                     <SelectItem key={opt} value={opt} className="text-foreground focus:bg-primary/10">
                                       {opt}
                                     </SelectItem>
@@ -309,7 +311,7 @@ export default function LeadForm() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-foreground/80 text-sm">
-                            Instagram do negócio <span className="text-muted-foreground">(opcional)</span>
+                            Instagram do negócio *
                           </FormLabel>
                           <FormControl>
                             <Input
