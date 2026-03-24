@@ -103,12 +103,12 @@ export default function LeadForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="grid-bg absolute inset-0 opacity-10" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 neon-orb opacity-30" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 neon-orb opacity-20" />
+        <div className="hidden md:block absolute top-1/4 left-1/4 w-96 h-96 neon-orb opacity-30" />
+        <div className="hidden md:block absolute bottom-1/4 right-1/4 w-64 h-64 neon-orb opacity-20" />
       </div>
 
       <div className="relative z-10 container px-4 py-8 md:py-16">
