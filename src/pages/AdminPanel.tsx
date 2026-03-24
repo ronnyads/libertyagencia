@@ -1429,7 +1429,12 @@ function AtividadesView({ leads, isLoadingLeads }: { leads: Lead[]; isLoadingLea
 function Dashboard() {
   const { data: leads = [], isLoading } = useLeads()
   const queryClient = useQueryClient()
-  const [view, setView] = useState('pipeline')
+  const [view, setView] = useState(() => sessionStorage.getItem('crm_view') ?? 'pipeline')
+
+  const handleNavigate = (id: string) => {
+    sessionStorage.setItem('crm_view', id)
+    setView(id)
+  }
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
@@ -1441,7 +1446,7 @@ function Dashboard() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <Sidebar active={view} onNavigate={setView} onLogout={handleLogout} />
+      <Sidebar active={view} onNavigate={handleNavigate} onLogout={handleLogout} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
