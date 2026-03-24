@@ -16,10 +16,15 @@ const Obrigado = lazy(() => import("./pages/Obrigado"));
 
 const queryClient = new QueryClient();
 
+// cursor global, scroll progress só na homepage
 function SiteOnlyEffects() {
   const { pathname } = useLocation();
-  if (pathname !== "/") return null;
-  return <><CustomCursor /><ScrollProgress /></>;
+  return (
+    <>
+      <CustomCursor />
+      {pathname === "/" && <ScrollProgress />}
+    </>
+  );
 }
 
 const App = () => (
