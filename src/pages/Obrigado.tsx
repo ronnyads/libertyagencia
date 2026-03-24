@@ -8,9 +8,15 @@ export default function Obrigado() {
   const isMentoria = searchParams.get('tipo') === 'mentoria'
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'Lead')
+    const fire = () => {
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'Lead')
+      }
     }
+    // Tenta imediatamente e depois com delay caso o pixel ainda esteja carregando
+    fire()
+    const t = setTimeout(fire, 1500)
+    return () => clearTimeout(t)
   }, [])
 
   return (
