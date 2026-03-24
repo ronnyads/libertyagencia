@@ -1412,54 +1412,69 @@ function Dashboard() {
 
 // ─── Integrações ──────────────────────────────────────────────────────────────
 
-const INTEGRATIONS = [
+const INTEGRATION_CONFIGS = [
   {
-    id: 'resend',
+    configKey: 'resend_from_email',
     name: 'Resend',
     icon: Mail,
-    status: 'connected' as const,
     description: 'Envia e-mails automáticos de confirmação para leads do /form e /mentoria-form.',
-    detail: 'contato@adsliberty.com',
+    placeholder: 'E-mail remetente (ex: contato@adsliberty.com)',
     href: 'https://resend.com/overview',
     linkLabel: 'Ver painel',
   },
   {
-    id: 'supabase',
+    configKey: 'supabase_project_ref',
     name: 'Supabase',
     icon: Database,
-    status: 'connected' as const,
     description: 'Banco de dados, autenticação e Edge Functions do painel.',
-    detail: 'oocnnimhhffvirkiyiev',
-    href: 'https://supabase.com/dashboard/project/oocnnimhhffvirkiyiev',
+    placeholder: 'Project Ref (ex: abcdefghijklmnopqrst)',
+    href: 'https://supabase.com/dashboard',
     linkLabel: 'Ver painel',
+  },
+  {
+    configKey: 'meta_pixel_id',
+    name: 'Meta Pixel',
+    icon: Link2,
+    description: 'Rastreia conversões do formulário para otimizar campanhas de anúncios no Meta Ads.',
+    placeholder: 'Pixel ID (ex: 1234567890)',
+    href: 'https://business.facebook.com/events_manager',
+    linkLabel: 'Events Manager',
   },
 ]
 
-function MetaPixelCard() {
-  const [pixelId, setPixelId] = useState('')
+function EditableIntegrationCard({ configKey, name, icon: Icon, description, placeholder, href, linkLabel }: {
+  configKey: string
+  name: string
+  icon: React.ElementType
+  description: string
+  placeholder: string
+  href: string
+  linkLabel: string
+}) {
+  const [valor, setValor] = useState('')
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    supabase.from('configuracoes').select('valor').eq('id', 'meta_pixel_id').single()
-      .then(({ data }) => { if (data?.valor) setPixelId(data.valor) })
-  }, [])
+    supabase.from('configuracoes').select('valor').eq('id', configKey).single()
+      .then(({ data }) => { if (data?.valor) setValor(data.valor) })
+  }, [configKey])
 
   const handleSave = async () => {
     setLoading(true)
-    await supabase.from('configuracoes').upsert({ id: 'meta_pixel_id', valor: pixelId.trim() })
+    await supabase.from('configuracoes').upsert({ id: configKey, valor: valor.trim() })
     setLoading(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const isConnected = pixelId.trim().length > 0
+  const isConnected = valor.trim().length > 0
 
   return (
     <div className="bg-card border border-foreground/10 rounded-xl p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between">
         <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-          <Link2 size={18} className="text-primary" />
+          <Icon size={18} className="text-primary" />
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
           isConnected
@@ -1470,14 +1485,14 @@ function MetaPixelCard() {
         </span>
       </div>
       <div>
-        <p className="font-semibold text-foreground text-sm mb-1">Meta Pixel</p>
-        <p className="text-muted-foreground text-xs leading-relaxed">Rastreia conversões do formulário para otimizar campanhas de anúncios no Meta Ads.</p>
+        <p className="font-semibold text-foreground text-sm mb-1">{name}</p>
+        <p className="text-muted-foreground text-xs leading-relaxed">{description}</p>
       </div>
       <div className="flex gap-2">
         <input
-          value={pixelId}
-          onChange={(e) => setPixelId(e.target.value)}
-          placeholder="Pixel ID (ex: 1234567890)"
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder={placeholder}
           className="flex-1 text-xs bg-background/50 border border-foreground/15 rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60"
         />
         <button
@@ -1489,9 +1504,9 @@ function MetaPixelCard() {
         </button>
       </div>
       <div className="pt-1 border-t border-foreground/8">
-        <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener noreferrer"
+        <a href={href} target="_blank" rel="noopener noreferrer"
           className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
-          Events Manager <ExternalLink size={11} />
+          {linkLabel} <ExternalLink size={11} />
         </a>
       </div>
     </div>
@@ -1505,44 +1520,15 @@ function IntegracoesView() {
         <h2 className="font-orbitron font-bold text-xl text-foreground mb-1">Integrações</h2>
         <p className="text-muted-foreground text-sm">Ferramentas conectadas ao seu painel Liberty.</p>
       </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {INTEGRATIONS.map((integration) => {
-          const Icon = integration.icon
-          const isConnected = integration.status === 'connected'
-          return (
-            <div key={integration.id} className="bg-card border border-foreground/10 rounded-xl p-5 flex flex-col gap-4">
-              <div className="flex items-start justify-between">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <Icon size={18} className="text-primary" />
-                </div>
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  isConnected
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                    : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                }`}>
-                  {isConnected ? 'Conectado' : 'Não configurado'}
-                </span>
-              </div>
-              <div>
-                <p className="font-semibold text-foreground text-sm mb-1">{integration.name}</p>
-                <p className="text-muted-foreground text-xs leading-relaxed">{integration.description}</p>
-              </div>
-              <div className="mt-auto pt-3 border-t border-foreground/8 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-mono truncate max-w-[120px]">{integration.detail}</span>
-                <a href={integration.href} target="_blank" rel="noopener noreferrer"
-                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors shrink-0">
-                  {integration.linkLabel} <ExternalLink size={11} />
-                </a>
-              </div>
-            </div>
-          )
-        })}
-        <MetaPixelCard />
+        {INTEGRATION_CONFIGS.map((cfg) => (
+          <EditableIntegrationCard key={cfg.configKey} {...cfg} />
+        ))}
       </div>
     </div>
   )
 }
+
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
