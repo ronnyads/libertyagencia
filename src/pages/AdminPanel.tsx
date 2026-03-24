@@ -661,7 +661,7 @@ function ContatosView({ leads, isLoading, onOpen }: {
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-card/90 backdrop-blur-sm border-b border-foreground/8 z-10">
               <tr>
-                {['Nome', 'WhatsApp', 'Faturamento', 'Serviço', 'Status', 'Origem', 'Valor', 'Criado em', ''].map((h) => (
+                {['Nome', 'WhatsApp', 'E-mail', 'Faturamento', 'Serviço', 'Status', 'Origem', 'Valor', 'Criado em', ''].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-[11px] text-muted-foreground uppercase tracking-wider font-medium whitespace-nowrap">
                     {h}
                   </th>
@@ -703,6 +703,14 @@ function ContatosView({ leads, isLoading, onOpen }: {
                           <Copy size={12} />
                         </button>
                       </div>
+                    </td>
+
+                    {/* E-mail */}
+                    <td className="px-4 py-3 text-xs text-muted-foreground max-w-[160px] truncate">
+                      {lead.email
+                        ? <a href={`mailto:${lead.email}`} onClick={(e) => e.stopPropagation()} className="hover:text-primary transition-colors">{lead.email}</a>
+                        : <span className="text-muted-foreground/30">—</span>
+                      }
                     </td>
 
                     {/* Faturamento */}

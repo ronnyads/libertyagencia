@@ -139,22 +139,27 @@ export default function MentoriaForm() {
     }
     if (!valid) return
 
-    await createLead.mutateAsync({
-      nome: nome.trim(),
-      whatsapp,
-      email,
-      situacao: answers.situacao ?? '',
-      projeto: answers.projeto ?? '',
-      nivel_tech: answers.nivel_tech ?? '',
-      objetivo: answers.objetivo ?? '',
-      horas_semana: answers.horas_semana ?? '',
-      tem_investimento: answers.tem_investimento ?? '',
-      utm_source: searchParams.get('utm_source') || undefined,
-      utm_medium: searchParams.get('utm_medium') || undefined,
-      utm_campaign: searchParams.get('utm_campaign') || undefined,
-    })
-    navigate('/obrigado?tipo=mentoria')
-  }
+    try {
+      await createLead.mutateAsync({
+        nome: nome.trim(),
+        whatsapp,
+        email,
+        situacao: answers.situacao ?? '',
+        projeto: answers.projeto ?? '',
+        nivel_tech: answers.nivel_tech ?? '',
+        objetivo: answers.objetivo ?? '',
+        horas_semana: answers.horas_semana ?? '',
+        tem_investimento: answers.tem_investimento ?? '',
+        utm_source: searchParams.get('utm_source') || undefined,
+        utm_medium: searchParams.get('utm_medium') || undefined,
+        utm_campaign: searchParams.get('utm_campaign') || undefined,
+      })
+      navigate('/obrigado?tipo=mentoria')
+    } catch (err: any) {
+      if (err?.message === 'duplicate') {
+        navigate('/obrigado?tipo=mentoria')
+      }
+    }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">

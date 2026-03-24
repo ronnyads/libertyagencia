@@ -30,7 +30,10 @@ export function useCreateLead() {
         utm_campaign: data.utm_campaign || null,
         status: 'novo',
       }])
-      if (error) throw error
+      if (error) {
+        if (error.code === '23505') throw new Error('duplicate')
+        throw error
+      }
 
       if (data.email) {
         const { subject, html } = templateDemoGratuita(data.nome, data.whatsapp)

@@ -65,13 +65,19 @@ export default function LeadForm() {
   }, [servicoParam])
 
   const onSubmit = async (data: FormValues) => {
-    await createLead.mutateAsync({
-      ...data,
-      utm_source: searchParams.get('utm_source') || undefined,
-      utm_medium: searchParams.get('utm_medium') || undefined,
-      utm_campaign: searchParams.get('utm_campaign') || undefined,
-    })
-    navigate('/obrigado')
+    try {
+      await createLead.mutateAsync({
+        ...data,
+        utm_source: searchParams.get('utm_source') || undefined,
+        utm_medium: searchParams.get('utm_medium') || undefined,
+        utm_campaign: searchParams.get('utm_campaign') || undefined,
+      })
+      navigate('/obrigado')
+    } catch (err: any) {
+      if (err?.message === 'duplicate') {
+        navigate('/obrigado') // já está cadastrado — manda para obrigado mesmo assim
+      }
+    }
   }
 
   return (
