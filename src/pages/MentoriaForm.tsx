@@ -160,6 +160,7 @@ export default function MentoriaForm() {
         navigate('/obrigado?tipo=mentoria')
       }
     }
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
