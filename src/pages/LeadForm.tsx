@@ -188,7 +188,7 @@ export default function LeadForm() {
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.55 }}
-                className="glass-card-neon p-8 rounded-2xl"
+                className="glass-card-neon p-5 md:p-8 rounded-2xl"
               >
                 <h2 className="font-orbitron font-bold text-xl mb-1 text-foreground">
                   Garanta seu Projeto Gratuito
