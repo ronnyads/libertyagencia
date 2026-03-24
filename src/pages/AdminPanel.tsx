@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useLeads, useUpdateLeadStatus, useUpdateLead } from '@/hooks/useLeads'
+import { useLeads, useUpdateLeadStatus, useUpdateLead, useDeleteLead } from '@/hooks/useLeads'
 import { useCreateLead } from '@/hooks/useCreateLead'
 import { useAtividades, useCreateAtividade, useConcluirAtividade, useReabrirAtividade, useDeleteAtividade } from '@/hooks/useAtividades'
 import { supabase } from '@/lib/supabase'
@@ -510,6 +510,8 @@ function ContatosView({ leads, isLoading, onOpen }: {
   const [statusFilter, setStatusFilter] = useState<string>('todos')
   const [faturamentoFilter, setFaturamentoFilter] = useState<string>('todos')
   const [addOpen, setAddOpen] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const deleteLead = useDeleteLead()
 
   const filtered = useMemo(() => {
     return leads.filter((l) => {
@@ -700,8 +702,37 @@ function ContatosView({ leads, isLoading, onOpen }: {
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(lead.created_at)}</td>
 
                     {/* Action */}
-                    <td className="px-4 py-3">
-                      <ChevronRight size={14} className="text-muted-foreground/40" />
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <ChevronRight size={14} className="text-muted-foreground/40" />
+                        {confirmDeleteId === lead.id ? (
+                          <div className="flex items-center gap-1 ml-1">
+                            <button
+                              onClick={() => {
+                                deleteLead.mutate(lead.id)
+                                setConfirmDeleteId(null)
+                              }}
+                              className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-colors"
+                            >
+                              Confirmar
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-[10px] px-2 py-0.5 rounded bg-foreground/5 text-muted-foreground border border-foreground/10 hover:bg-foreground/10 transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setConfirmDeleteId(lead.id)}
+                            className="ml-1 text-muted-foreground/30 hover:text-red-400 transition-colors"
+                            title="Excluir lead"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )
