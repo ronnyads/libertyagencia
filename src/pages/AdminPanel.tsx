@@ -399,12 +399,16 @@ function AddContactModal({ open, onClose }: { open: boolean; onClose: () => void
 
 // ─── Lead Card ────────────────────────────────────────────────────────────────
 
-function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: (lead: Lead) => void }) {
+function LeadCard({ lead, onOpen, onDragStart }: { lead: Lead; onOpen: (lead: Lead) => void; onDragStart: (lead: Lead) => void }) {
   const updateStatus = useUpdateLeadStatus()
   const cfg = stageConfig(lead.status)
 
   return (
-    <div className="bg-background/60 border border-foreground/8 hover:border-foreground/20 rounded-xl p-4 transition-colors">
+    <div
+      draggable
+      onDragStart={() => onDragStart(lead)}
+      className="bg-background/60 border border-foreground/8 hover:border-foreground/20 rounded-xl p-4 transition-colors cursor-grab active:cursor-grabbing active:opacity-60 active:scale-95"
+    >
       <div className="flex items-start justify-between gap-2 mb-2">
         <button onClick={() => onOpen(lead)} className="font-semibold text-sm text-foreground hover:text-primary transition-colors text-left leading-tight">
           {lead.nome}
@@ -447,22 +451,40 @@ function LeadCard({ lead, onOpen }: { lead: Lead; onOpen: (lead: Lead) => void }
 
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 
-function KanbanColumn({ stage, leads, onOpen }: {
+function KanbanColumn({ stage, leads, onOpen, onDragStart, onDrop }: {
   stage: typeof STAGES[number]
   leads: Lead[]
   onOpen: (lead: Lead) => void
+  onDragStart: (lead: Lead) => void
+  onDrop: (status: LeadStatus) => void
 }) {
+  const [isDragOver, setIsDragOver] = useState(false)
+
   return (
-    <div className={`min-w-[260px] w-[260px] flex flex-col rounded-xl border border-foreground/8 border-t-2 ${stage.border} bg-card/20`}>
+    <div
+      className={`min-w-[260px] w-[260px] flex flex-col rounded-xl border border-t-2 ${stage.border} bg-card/20 transition-colors ${
+        isDragOver ? 'border-primary/60 bg-primary/5' : 'border-foreground/8'
+      }`}
+      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true) }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={() => { setIsDragOver(false); onDrop(stage.value) }}
+    >
       <div className="px-4 py-3 flex items-center justify-between border-b border-foreground/8">
         <span className={`text-xs font-bold uppercase tracking-wider ${stage.color}`}>{stage.label}</span>
         <Badge className={`text-[10px] px-1.5 py-0 border ${stage.badge}`}>{leads.length}</Badge>
       </div>
-      <div className="flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-160px)]">
+      <div className={`flex-1 p-3 space-y-3 overflow-y-auto max-h-[calc(100vh-160px)] min-h-[80px] transition-colors ${isDragOver ? 'bg-primary/5 rounded-b-xl' : ''}`}>
         {leads.length === 0 ? (
-          <p className="text-center text-muted-foreground/40 text-xs py-8">Nenhum lead</p>
+          <p className={`text-center text-xs py-8 transition-colors ${isDragOver ? 'text-primary/60' : 'text-muted-foreground/40'}`}>
+            {isDragOver ? 'Soltar aqui' : 'Nenhum lead'}
+          </p>
         ) : (
-          leads.map((lead) => <LeadCard key={lead.id} lead={lead} onOpen={onOpen} />)
+          leads.map((lead) => <LeadCard key={lead.id} lead={lead} onOpen={onOpen} onDragStart={onDragStart} />)
+        )}
+        {isDragOver && leads.length > 0 && (
+          <div className="border-2 border-dashed border-primary/40 rounded-xl h-16 flex items-center justify-center">
+            <span className="text-primary/60 text-xs">Soltar aqui</span>
+          </div>
         )}
       </div>
     </div>
@@ -476,6 +498,9 @@ function PipelineView({ leads, isLoading, onOpen }: {
   isLoading: boolean
   onOpen: (lead: Lead) => void
 }) {
+  const [dragging, setDragging] = useState<Lead | null>(null)
+  const updateStatus = useUpdateLeadStatus()
+
   const byStage = useMemo(() => {
     const map: Record<LeadStatus, Lead[]> = {
       novo: [], em_contato: [], qualificado: [], proposta_enviada: [], negociacao: [], ganho: [], perdido: [],
@@ -484,6 +509,12 @@ function PipelineView({ leads, isLoading, onOpen }: {
     return map
   }, [leads])
 
+  const handleDrop = (status: LeadStatus) => {
+    if (!dragging || dragging.status === status) return
+    updateStatus.mutate({ id: dragging.id, status })
+    setDragging(null)
+  }
+
   return (
     <div className="flex-1 overflow-auto p-4">
       {isLoading ? (
@@ -491,7 +522,14 @@ function PipelineView({ leads, isLoading, onOpen }: {
       ) : (
         <div className="flex gap-3 min-w-max pb-4">
           {STAGES.map((stage) => (
-            <KanbanColumn key={stage.value} stage={stage} leads={byStage[stage.value]} onOpen={onOpen} />
+            <KanbanColumn
+              key={stage.value}
+              stage={stage}
+              leads={byStage[stage.value]}
+              onOpen={onOpen}
+              onDragStart={setDragging}
+              onDrop={handleDrop}
+            />
           ))}
         </div>
       )}
