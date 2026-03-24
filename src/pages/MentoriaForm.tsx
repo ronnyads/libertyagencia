@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { useCreateMentoriaLead } from '@/hooks/useCreateMentoriaLead'
@@ -82,60 +82,10 @@ const slideVariants = {
   exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
 }
 
-function SuccessScreen({ temInvestimento }: { temInvestimento: string }) {
-  const hasInvestment = temInvestimento !== 'Não tenho no momento'
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center justify-center text-center py-16 px-4 max-w-lg mx-auto"
-    >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 20 }}
-        className="w-20 h-20 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mb-6"
-        style={{ boxShadow: '0 0 40px rgba(0,212,255,0.2)' }}
-      >
-        <CheckCircle className="text-primary" size={40} />
-      </motion.div>
-
-      <h2 className="font-orbitron font-bold text-2xl md:text-3xl mb-4 text-foreground">
-        Candidatura recebida!
-      </h2>
-
-      {hasInvestment ? (
-        <p className="text-muted-foreground text-base mb-8 max-w-sm">
-          Nossa equipe vai analisar seu perfil e entrar em contato em até 24h via WhatsApp.
-        </p>
-      ) : (
-        <>
-          <p className="text-muted-foreground text-base mb-3 max-w-sm">
-            Recebemos sua candidatura! Quando você estiver pronto, estaremos aqui.
-          </p>
-          <p className="text-muted-foreground text-sm mb-8 max-w-sm">
-            Enquanto isso, que tal ver nossa demo gratuita?
-          </p>
-          <Link
-            to="/form"
-            className="neon-button px-8 py-3 text-sm font-bold inline-flex items-center gap-2 mb-6"
-          >
-            Ver demo gratuita <ArrowRight size={16} />
-          </Link>
-        </>
-      )}
-
-      <Link to="/" className="text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center gap-1">
-        <ArrowLeft size={14} /> Voltar ao site
-      </Link>
-    </motion.div>
-  )
-}
 
 export default function MentoriaForm() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -145,7 +95,6 @@ export default function MentoriaForm() {
   const [nomeError, setNomeError] = useState('')
   const [zapError, setZapError] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [submitted, setSubmitted] = useState(false)
   const createLead = useCreateMentoriaLead()
 
   const isContactStep = step === STEPS.length
@@ -204,27 +153,7 @@ export default function MentoriaForm() {
       utm_medium: searchParams.get('utm_medium') || undefined,
       utm_campaign: searchParams.get('utm_campaign') || undefined,
     })
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'Lead')
-    }
-    setSubmitted(true)
-  }
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background text-foreground relative">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="grid-bg absolute inset-0 opacity-10" />
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 neon-orb opacity-30" />
-        </div>
-        <div className="relative z-10 container px-4 py-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm transition-colors mb-10">
-            <ArrowLeft size={16} /> Voltar ao site
-          </Link>
-          <SuccessScreen temInvestimento={answers.tem_investimento ?? ''} />
-        </div>
-      </div>
-    )
+    navigate('/obrigado?tipo=mentoria')
   }
 
   return (

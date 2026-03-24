@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useSearchParams, Link } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, ArrowLeft, Zap, Shield, Clock } from 'lucide-react'
+import { ArrowLeft, Zap, Shield, Clock } from 'lucide-react'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -40,42 +40,9 @@ const maskPhone = (v: string) => {
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
 }
 
-function SuccessScreen() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.92 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center justify-center text-center py-12 px-4"
-    >
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 20 }}
-        className="w-20 h-20 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mb-6"
-        style={{ boxShadow: '0 0 40px rgba(0,212,255,0.2)' }}
-      >
-        <CheckCircle className="text-primary" size={40} />
-      </motion.div>
-      <h2 className="font-orbitron font-bold text-2xl md:text-3xl mb-3 text-foreground">
-        Solicitação recebida!
-      </h2>
-      <p className="text-muted-foreground text-base mb-2 max-w-sm">
-        Nossa equipe vai analisar seu negócio e entrar em contato em até 24h.
-      </p>
-      <p className="text-muted-foreground text-sm mb-8 max-w-sm">
-        Nossa equipe vai entrar em contato via WhatsApp em até 24h.
-      </p>
-      <Link to="/" className="text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center gap-1">
-        <ArrowLeft size={14} /> Voltar ao site
-      </Link>
-    </motion.div>
-  )
-}
-
 export default function LeadForm() {
   const [searchParams] = useSearchParams()
-  const [submitted, setSubmitted] = useState(false)
+  const navigate = useNavigate()
   const [termoOpen, setTermoOpen] = useState(false)
   const servicoParam = searchParams.get('servico') ?? ''
   const createLead = useCreateLead()
@@ -104,10 +71,7 @@ export default function LeadForm() {
       utm_medium: searchParams.get('utm_medium') || undefined,
       utm_campaign: searchParams.get('utm_campaign') || undefined,
     })
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'Lead')
-    }
-    setSubmitted(true)
+    navigate('/obrigado')
   }
 
   return (
@@ -126,10 +90,7 @@ export default function LeadForm() {
         </Link>
 
         <AnimatePresence mode="wait">
-          {submitted ? (
-            <SuccessScreen key="success" />
-          ) : (
-            <motion.div
+          <motion.div
               key="form"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -405,7 +366,6 @@ export default function LeadForm() {
                 </Dialog>
               </motion.div>
             </motion.div>
-          )}
         </AnimatePresence>
       </div>
     </div>
