@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCreateLead } from '@/hooks/useCreateLead'
 
+// Segmentos do negócio — v2
 const segmentoOptions = [
   'Loja / E-commerce',
   'Clínica / Saúde',
