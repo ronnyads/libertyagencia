@@ -107,13 +107,13 @@ function exportCSV(leads: Lead[]) {
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS = [
-  { id: 'pipeline',   label: 'Pipeline',   icon: Kanban,       active: true },
-  { id: 'contatos',   label: 'Contatos',   icon: Users,        active: true },
-  { id: 'inbox',      label: 'Inbox IA',   icon: Inbox,        active: true },
-  { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: true },
-  { id: 'atividades',  label: 'Atividades',  icon: CheckSquare, active: true },
-  { id: 'integracoes', label: 'Integrações', icon: Zap,         active: true },
-  { id: 'relatorios',  label: 'Relatórios',  icon: BarChart2,   active: false },
+  { id: 'pipeline',    label: 'Pipeline',    icon: Kanban,       active: true },
+  { id: 'inbox',       label: 'Inbox IA',    icon: Inbox,        active: true },
+  { id: 'contatos',    label: 'Contatos',    icon: Users,        active: true },
+  { id: 'negocios',    label: 'Negócios',    icon: Briefcase,    active: true },
+  { id: 'atividades',  label: 'Atividades',  icon: CheckSquare,  active: true },
+  { id: 'relatorios',  label: 'Relatórios',  icon: BarChart2,    active: false },
+  { id: 'integracoes', label: 'Integrações', icon: Zap,          active: true },
 ]
 
 function Sidebar({ active, onNavigate, onLogout }: {
