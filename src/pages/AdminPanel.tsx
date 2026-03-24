@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import {
   RefreshCw, LogOut, Copy, ExternalLink, Lock, ChevronRight,
   Kanban, Users, Briefcase, CheckSquare, BarChart2, UserCircle,
   Search, Filter, Download, Plus, X, PhoneCall,
   Phone, MessageCircle, Mail, Circle, Check, Trash2, AlertTriangle, Calendar, Clock,
-  Zap, Link2, Database,
+  Zap, Link2, Database, Bot, Send, Pause, Play, Inbox,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +18,8 @@ import { useLeads, useUpdateLeadStatus, useUpdateLead } from '@/hooks/useLeads'
 import { useCreateLead } from '@/hooks/useCreateLead'
 import { useAtividades, useCreateAtividade, useConcluirAtividade, useReabrirAtividade, useDeleteAtividade } from '@/hooks/useAtividades'
 import { supabase } from '@/lib/supabase'
-import type { Lead, LeadStatus, Atividade, AtividadeTipo } from '@/lib/supabase'
+import type { Lead, LeadStatus, Atividade, AtividadeTipo, Conversa, Mensagem } from '@/lib/supabase'
+import { useConversas, useMensagens, useCreateConversa, useUpdateConversa, useEnviarMensagem, useGerarRespostaIA } from '@/hooks/useConversas'
 
 // ─── Pipeline config ──────────────────────────────────────────────────────────
 
@@ -108,6 +109,7 @@ function exportCSV(leads: Lead[]) {
 const NAV_ITEMS = [
   { id: 'pipeline',   label: 'Pipeline',   icon: Kanban,       active: true },
   { id: 'contatos',   label: 'Contatos',   icon: Users,        active: true },
+  { id: 'inbox',      label: 'Inbox IA',   icon: Inbox,        active: true },
   { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: true },
   { id: 'atividades',  label: 'Atividades',  icon: CheckSquare, active: true },
   { id: 'integracoes', label: 'Integrações', icon: Zap,         active: true },
@@ -1402,10 +1404,248 @@ function Dashboard() {
         {view === 'atividades' && (
           <AtividadesView leads={leads} isLoadingLeads={isLoading} />
         )}
+        {view === 'inbox' && <InboxView />}
         {view === 'integracoes' && <IntegracoesView />}
       </div>
 
       <LeadSheet lead={selectedLead} open={sheetOpen} onClose={() => setSheetOpen(false)} />
+    </div>
+  )
+}
+
+// ─── Inbox IA ─────────────────────────────────────────────────────────────────
+
+function timeAgoMsg(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  const h = Math.floor(diff / 3600000)
+  const d = Math.floor(diff / 86400000)
+  if (d > 0) return `${d}d`
+  if (h > 0) return `${h}h`
+  if (m > 0) return `${m}m`
+  return 'agora'
+}
+
+function InboxView() {
+  const { data: conversas = [], isLoading } = useConversas()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const createConversa = useCreateConversa()
+  const updateConversa = useUpdateConversa()
+  const enviarMensagem = useEnviarMensagem()
+  const gerarResposta = useGerarRespostaIA()
+  const { data: mensagens = [] } = useMensagens(selectedId)
+  const [texto, setTexto] = useState('')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { data: leads = [] } = useConversas() // re-use for leads list via useLeads below
+  const { data: allLeads = [] } = { data: [] as Lead[] } // placeholder — we'll use real hook
+
+  const selectedConversa = conversas.find((c) => c.id === selectedId)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [mensagens])
+
+  const handleEnviar = async () => {
+    if (!texto.trim() || !selectedId) return
+    await enviarMensagem.mutateAsync({ conversa_id: selectedId, conteudo: texto.trim(), remetente: 'humano' })
+    setTexto('')
+  }
+
+  const handleGerarIA = async () => {
+    if (!selectedConversa) return
+    await gerarResposta.mutateAsync({
+      lead_id: selectedConversa.lead_id,
+      conversa_id: selectedConversa.id,
+    })
+  }
+
+  const handleToggleIA = async () => {
+    if (!selectedConversa) return
+    await updateConversa.mutateAsync({ id: selectedConversa.id, ia_ativa: !selectedConversa.ia_ativa })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+        Carregando inbox...
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+      {/* ── Lista de conversas ── */}
+      <div className="w-72 shrink-0 border-r border-foreground/8 flex flex-col">
+        <div className="px-4 py-4 border-b border-foreground/8">
+          <h2 className="font-orbitron font-bold text-sm text-foreground">Inbox IA</h2>
+          <p className="text-muted-foreground text-xs mt-0.5">{conversas.length} conversas</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {conversas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
+              <Bot size={32} className="text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground text-xs">Nenhuma conversa ainda.</p>
+              <p className="text-muted-foreground/60 text-xs mt-1">As conversas aparecem aqui quando leads respondem.</p>
+            </div>
+          ) : (
+            conversas.map((c) => {
+              const lead = c.lead as any
+              const isSelected = selectedId === c.id
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedId(c.id)}
+                  className={`w-full text-left px-4 py-3 border-b border-foreground/5 hover:bg-foreground/5 transition-colors ${isSelected ? 'bg-primary/10 border-l-2 border-l-primary' : ''}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
+                      <span className="text-primary font-bold text-xs">
+                        {lead?.nome?.slice(0, 2).toUpperCase() ?? '??'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="font-medium text-sm text-foreground truncate">{lead?.nome ?? 'Lead'}</span>
+                        <span className="text-muted-foreground text-[10px] shrink-0 ml-1">{timeAgoMsg(c.updated_at)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${c.ia_ativa ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+                        <span className="text-muted-foreground text-xs truncate">
+                          {c.ia_ativa ? 'IA ativa' : 'Humano'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              )
+            })
+          )}
+        </div>
+      </div>
+
+      {/* ── Painel de chat ── */}
+      {selectedConversa ? (
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-foreground/8 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                <span className="text-primary font-bold text-xs">
+                  {((selectedConversa.lead as any)?.nome ?? '??').slice(0, 2).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="font-semibold text-sm text-foreground">{(selectedConversa.lead as any)?.nome ?? 'Lead'}</p>
+                <p className="text-muted-foreground text-xs">{(selectedConversa.lead as any)?.whatsapp}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Toggle IA */}
+              <button
+                onClick={handleToggleIA}
+                disabled={updateConversa.isPending}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  selectedConversa.ia_ativa
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                    : 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20'
+                }`}
+              >
+                {selectedConversa.ia_ativa ? <><Pause size={12} /> Pausar IA</> : <><Play size={12} /> Reativar IA</>}
+              </button>
+              {/* Contexto do lead */}
+              <div className="text-xs text-muted-foreground border border-foreground/10 rounded-lg px-3 py-1.5 hidden lg:flex items-center gap-2">
+                <span className="text-foreground/60">Fat:</span>
+                <span>{(selectedConversa.lead as any)?.faturamento ?? '—'}</span>
+                {(selectedConversa.lead as any)?.utm_source && (
+                  <><span className="text-foreground/30">|</span><span>{(selectedConversa.lead as any).utm_source}</span></>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Mensagens */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+            {mensagens.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <Bot size={32} className="text-muted-foreground/30 mb-3" />
+                <p className="text-muted-foreground text-sm">Nenhuma mensagem ainda.</p>
+                <p className="text-muted-foreground/60 text-xs mt-1">Use "Gerar resposta IA" para iniciar a conversa.</p>
+              </div>
+            )}
+            {mensagens.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex ${msg.remetente === 'lead' ? 'justify-start' : 'justify-end'}`}
+              >
+                <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  msg.remetente === 'lead'
+                    ? 'bg-foreground/8 text-foreground rounded-tl-sm'
+                    : msg.remetente === 'ia'
+                    ? 'bg-primary/15 border border-primary/20 text-foreground rounded-tr-sm'
+                    : 'bg-emerald-500/15 border border-emerald-500/20 text-foreground rounded-tr-sm'
+                }`}>
+                  {msg.remetente !== 'lead' && (
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className={`text-[10px] font-semibold uppercase tracking-wide ${
+                        msg.remetente === 'ia' ? 'text-primary' : 'text-emerald-400'
+                      }`}>
+                        {msg.remetente === 'ia' ? '🤖 IA' : '👤 Você'}
+                      </span>
+                      {!msg.enviada && <span className="text-[10px] text-yellow-400 ml-1">• não enviado</span>}
+                    </div>
+                  )}
+                  <p className="whitespace-pre-wrap">{msg.conteudo}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 text-right">{timeAgoMsg(msg.created_at)}</p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="px-6 py-4 border-t border-foreground/8 shrink-0">
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={handleGerarIA}
+                disabled={gerarResposta.isPending}
+                className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+              >
+                <Bot size={14} />
+                {gerarResposta.isPending ? 'Gerando...' : 'Gerar resposta IA'}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <Textarea
+                value={texto}
+                onChange={(e) => setTexto(e.target.value)}
+                placeholder="Digite uma mensagem manual..."
+                className="flex-1 resize-none text-sm bg-background/50 border-foreground/15 focus:border-primary/60 min-h-[60px] max-h-[120px]"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleEnviar()
+                  }
+                }}
+              />
+              <button
+                onClick={handleEnviar}
+                disabled={!texto.trim() || enviarMensagem.isPending}
+                className="px-4 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors disabled:opacity-40"
+              >
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center text-center">
+          <div>
+            <Bot size={40} className="text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground text-sm">Selecione uma conversa</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1439,6 +1679,51 @@ const INTEGRATION_CONFIGS = [
     placeholder: 'Pixel ID (ex: 1234567890)',
     href: 'https://business.facebook.com/events_manager',
     linkLabel: 'Events Manager',
+  },
+  {
+    configKey: 'whatsapp_token',
+    name: 'WhatsApp Token',
+    icon: MessageCircle,
+    description: 'Bearer token da WhatsApp Business API para envio automático de mensagens.',
+    placeholder: 'EAAxxxxxxxxxxxxxxxx...',
+    href: 'https://developers.facebook.com/apps',
+    linkLabel: 'Meta Developers',
+  },
+  {
+    configKey: 'whatsapp_phone_id',
+    name: 'WhatsApp Phone ID',
+    icon: Phone,
+    description: 'Phone Number ID do seu número no Meta Business (encontrado no painel do app).',
+    placeholder: '1234567890123456',
+    href: 'https://developers.facebook.com/apps',
+    linkLabel: 'Meta Developers',
+  },
+  {
+    configKey: 'openai_api_key',
+    name: 'OpenAI API Key',
+    icon: Bot,
+    description: 'Chave da OpenAI para a IA gerar respostas personalizadas no Inbox.',
+    placeholder: 'sk-proj-xxxxxxxxxxxxxxxx',
+    href: 'https://platform.openai.com/api-keys',
+    linkLabel: 'Gerar chave',
+  },
+  {
+    configKey: 'ia_nome',
+    name: 'Nome da IA',
+    icon: UserCircle,
+    description: 'Nome que a IA usa para se apresentar nas mensagens (ex: Ana, Alex).',
+    placeholder: 'Ana',
+    href: '#',
+    linkLabel: '',
+  },
+  {
+    configKey: 'ia_auto_envio',
+    name: 'Envio Automático',
+    icon: Zap,
+    description: 'Se "true", a IA envia direto pelo WhatsApp. Se "false", você aprova primeiro no Inbox.',
+    placeholder: 'true ou false',
+    href: '#',
+    linkLabel: '',
   },
 ]
 
@@ -1514,16 +1799,62 @@ function EditableIntegrationCard({ configKey, name, icon: Icon, description, pla
 }
 
 function IntegracoesView() {
+  const [prompt, setPrompt] = useState('')
+  const [promptSaved, setPromptSaved] = useState(false)
+  const [promptLoading, setPromptLoading] = useState(false)
+
+  useEffect(() => {
+    supabase.from('configuracoes').select('valor').eq('id', 'ia_prompt_sistema').single()
+      .then(({ data }) => { if (data?.valor) setPrompt(data.valor) })
+  }, [])
+
+  const handleSavePrompt = async () => {
+    setPromptLoading(true)
+    await supabase.from('configuracoes').upsert({ id: 'ia_prompt_sistema', valor: prompt })
+    setPromptLoading(false)
+    setPromptSaved(true)
+    setTimeout(() => setPromptSaved(false), 2000)
+  }
+
   return (
-    <div className="p-8 max-w-4xl">
-      <div className="mb-8">
+    <div className="p-8 max-w-5xl space-y-10">
+      <div>
         <h2 className="font-orbitron font-bold text-xl text-foreground mb-1">Integrações</h2>
         <p className="text-muted-foreground text-sm">Ferramentas conectadas ao seu painel Liberty.</p>
       </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {INTEGRATION_CONFIGS.map((cfg) => (
           <EditableIntegrationCard key={cfg.configKey} {...cfg} />
         ))}
+      </div>
+
+      {/* System Prompt da IA */}
+      <div className="border border-foreground/10 rounded-xl p-6 bg-card">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Bot size={18} className="text-primary" />
+          </div>
+          <div>
+            <p className="font-semibold text-foreground text-sm">Script da IA (System Prompt)</p>
+            <p className="text-muted-foreground text-xs">Define como a IA se comporta, vende e responde leads. Use {'{ia_nome}'} para o nome configurado.</p>
+          </div>
+        </div>
+        <Textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder="Você é {ia_nome}, assistente de vendas da Liberty Agência..."
+          className="min-h-[200px] text-sm bg-background/50 border-foreground/15 focus:border-primary/60 resize-y font-mono"
+        />
+        <div className="flex justify-end mt-3">
+          <button
+            onClick={handleSavePrompt}
+            disabled={promptLoading}
+            className="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+          >
+            {promptSaved ? <><Check size={14} /> Salvo!</> : promptLoading ? 'Salvando...' : 'Salvar script'}
+          </button>
+        </div>
       </div>
     </div>
   )

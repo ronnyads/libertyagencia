@@ -30,6 +30,30 @@ export interface Atividade {
   lead_nome?: string
 }
 
+export interface Conversa {
+  id: string
+  lead_id: string
+  canal: string
+  status: 'ativo' | 'resolvido' | 'pausado'
+  ia_ativa: boolean
+  created_at: string
+  updated_at: string
+  // joined
+  lead?: Lead
+  ultima_mensagem?: string
+  total_mensagens?: number
+}
+
+export interface Mensagem {
+  id: string
+  conversa_id: string
+  remetente: 'lead' | 'ia' | 'humano'
+  conteudo: string
+  wa_message_id: string | null
+  enviada: boolean
+  created_at: string
+}
+
 export interface Lead {
   id: string
   nome: string
