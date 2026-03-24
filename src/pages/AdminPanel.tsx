@@ -4,6 +4,7 @@ import {
   Kanban, Users, Briefcase, CheckSquare, BarChart2, UserCircle,
   Search, Filter, Download, Plus, X, PhoneCall,
   Phone, MessageCircle, Mail, Circle, Check, Trash2, AlertTriangle, Calendar, Clock,
+  Zap, Link2, Database,
 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -108,8 +109,9 @@ const NAV_ITEMS = [
   { id: 'pipeline',   label: 'Pipeline',   icon: Kanban,       active: true },
   { id: 'contatos',   label: 'Contatos',   icon: Users,        active: true },
   { id: 'negocios',   label: 'Negócios',   icon: Briefcase,    active: true },
-  { id: 'atividades', label: 'Atividades', icon: CheckSquare,  active: true },
-  { id: 'relatorios', label: 'Relatórios', icon: BarChart2,    active: false },
+  { id: 'atividades',  label: 'Atividades',  icon: CheckSquare, active: true },
+  { id: 'integracoes', label: 'Integrações', icon: Zap,         active: true },
+  { id: 'relatorios',  label: 'Relatórios',  icon: BarChart2,   active: false },
 ]
 
 function Sidebar({ active, onNavigate, onLogout }: {
@@ -1392,9 +1394,96 @@ function Dashboard() {
         {view === 'atividades' && (
           <AtividadesView leads={leads} isLoadingLeads={isLoading} />
         )}
+        {view === 'integracoes' && <IntegracoesView />}
       </div>
 
       <LeadSheet lead={selectedLead} open={sheetOpen} onClose={() => setSheetOpen(false)} />
+    </div>
+  )
+}
+
+// ─── Integrações ──────────────────────────────────────────────────────────────
+
+const INTEGRATIONS = [
+  {
+    id: 'resend',
+    name: 'Resend',
+    icon: Mail,
+    status: 'connected' as const,
+    description: 'Envia e-mails automáticos de confirmação para leads do /form e /mentoria-form.',
+    detail: 'contato@adsliberty.com',
+    href: 'https://resend.com/overview',
+    linkLabel: 'Ver painel',
+  },
+  {
+    id: 'supabase',
+    name: 'Supabase',
+    icon: Database,
+    status: 'connected' as const,
+    description: 'Banco de dados, autenticação e Edge Functions do painel.',
+    detail: 'oocnnimhhffvirkiyiev',
+    href: 'https://supabase.com/dashboard/project/oocnnimhhffvirkiyiev',
+    linkLabel: 'Ver painel',
+  },
+  {
+    id: 'meta_pixel',
+    name: 'Meta Pixel',
+    icon: Link2,
+    status: 'pending' as const,
+    description: 'Rastreia conversões do formulário para otimizar campanhas de anúncios no Meta Ads.',
+    detail: 'Pixel ID não configurado',
+    href: 'https://www.facebook.com/business/help/952192354843755',
+    linkLabel: 'Como configurar',
+  },
+]
+
+function IntegracoesView() {
+  return (
+    <div className="p-8 max-w-4xl">
+      <div className="mb-8">
+        <h2 className="font-orbitron font-bold text-xl text-foreground mb-1">Integrações</h2>
+        <p className="text-muted-foreground text-sm">Ferramentas conectadas ao seu painel Liberty.</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {INTEGRATIONS.map((integration) => {
+          const Icon = integration.icon
+          const isConnected = integration.status === 'connected'
+          return (
+            <div key={integration.id} className="bg-card border border-foreground/10 rounded-xl p-5 flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <Icon size={18} className="text-primary" />
+                </div>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  isConnected
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                }`}>
+                  {isConnected ? 'Conectado' : 'Não configurado'}
+                </span>
+              </div>
+
+              <div>
+                <p className="font-semibold text-foreground text-sm mb-1">{integration.name}</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">{integration.description}</p>
+              </div>
+
+              <div className="mt-auto pt-3 border-t border-foreground/8 flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono truncate max-w-[120px]">{integration.detail}</span>
+                <a
+                  href={integration.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors shrink-0"
+                >
+                  {integration.linkLabel} <ExternalLink size={11} />
+                </a>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
