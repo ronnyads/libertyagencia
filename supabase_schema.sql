@@ -59,6 +59,7 @@ create table if not exists lessons (
   title text not null,
   duration text default '',
   video_url text default '',
+  cover_url text default '',
   objectives jsonb default '[]',
   summary text default '',
   task text default '',

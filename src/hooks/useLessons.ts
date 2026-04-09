@@ -8,6 +8,7 @@ export interface DBLesson {
   title: string;
   duration: string;
   video_url: string;
+  cover_url?: string;
   objectives: string[];
   summary: string;
   task: string;

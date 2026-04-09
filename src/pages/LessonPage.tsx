@@ -5,7 +5,7 @@ import { useLessons } from '@/hooks/useLessons';
 import { Play, Download, Check } from 'lucide-react';
 import { useState } from 'react';
 
-function VideoPlayer({ url, title, duration }: { url: string; title: string; duration?: string }) {
+function VideoPlayer({ url, title, duration, coverUrl }: { url: string; title: string; duration?: string; coverUrl?: string }) {
   const [playing, setPlaying] = useState(false);
 
   const ytMatch = url?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/);
@@ -13,6 +13,7 @@ function VideoPlayer({ url, title, duration }: { url: string; title: string; dur
 
   // Thumbnail do YouTube
   const ytThumb = ytMatch ? `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg` : null;
+  const cover = coverUrl || ytThumb;
 
   // Placeholder (sem URL ou não reconhecido)
   if (!url) {
@@ -33,13 +34,13 @@ function VideoPlayer({ url, title, duration }: { url: string; title: string; dur
       <div className="aspect-video relative overflow-hidden cursor-pointer group" onClick={() => setPlaying(true)}
         style={{ background: '#0A0F1E' }}>
         {/* Thumbnail */}
-        {ytThumb && (
-          <img src={ytThumb} alt={title} className="absolute inset-0 w-full h-full object-cover"
+        {cover && (
+          <img src={cover} alt={title} className="absolute inset-0 w-full h-full object-cover"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         )}
         {/* Overlay escuro */}
         <div className="absolute inset-0 transition-opacity duration-300"
-          style={{ background: ytThumb ? 'rgba(6,11,24,0.55)' : 'linear-gradient(145deg, #0C1225, #0A0F1E)' }} />
+          style={{ background: cover ? 'rgba(6,11,24,0.55)' : 'linear-gradient(145deg, #0C1225, #0A0F1E)' }} />
         {/* Glow radial atrás do botão */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)' }} />
@@ -128,7 +129,7 @@ export default function LessonPage() {
         <div className="flex-1 lg:w-[65%]">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
             className="rounded-2xl overflow-hidden border" style={{ borderColor: 'rgba(59,130,246,0.3)' }}>
-            <VideoPlayer url={lesson.video_url} title={`Aula ${lesson.number} — ${lesson.title}`} />
+            <VideoPlayer url={lesson.video_url} title={`Aula ${lesson.number} — ${lesson.title}`} coverUrl={lesson.cover_url} duration={lesson.duration} />
           </motion.div>
           <div className="mt-2 progress-bar-track"><div className="progress-bar-fill" style={{ width: completed ? '100%' : '35%' }} /></div>
           <div className="flex items-center justify-between mt-2 px-1">

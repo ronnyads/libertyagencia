@@ -9,13 +9,14 @@ function LessonRow({ lesson, moduleId }: { lesson: any; moduleId: string }) {
   const [title, setTitle] = useState(lesson.title);
   const [duration, setDuration] = useState(lesson.duration);
   const [videoUrl, setVideoUrl] = useState(lesson.video_url || '');
+  const [coverUrl, setCoverUrl] = useState(lesson.cover_url || '');
   const [status, setStatus] = useState(lesson.status);
   const update = useUpdateLesson();
   const del = useDeleteLesson();
   const [dirty, setDirty] = useState(false);
 
   const save = () => {
-    update.mutate({ id: lesson.id, title, duration, video_url: videoUrl, status }, {
+    update.mutate({ id: lesson.id, title, duration, video_url: videoUrl, cover_url: coverUrl, status }, {
       onSuccess: () => { toast.success('Aula salva!'); setDirty(false); },
       onError: () => toast.error('Erro ao salvar.'),
     });
@@ -34,6 +35,9 @@ function LessonRow({ lesson, moduleId }: { lesson: any; moduleId: string }) {
       <input value={videoUrl} onChange={e => { setVideoUrl(e.target.value); setDirty(true); }}
         className="w-48 bg-transparent font-inter text-[12px] text-white border border-transparent hover:border-border focus:border-zppia-blue rounded-lg px-2 py-1 focus:outline-none transition-colors"
         placeholder="URL do vídeo (Panda/YouTube/Vimeo)" />
+      <input value={coverUrl} onChange={e => { setCoverUrl(e.target.value); setDirty(true); }}
+        className="w-44 bg-transparent font-inter text-[12px] text-white border border-transparent hover:border-border focus:border-zppia-blue rounded-lg px-2 py-1 focus:outline-none transition-colors"
+        placeholder="Capa (imagem)" />
       <select value={status} onChange={e => { setStatus(e.target.value); setDirty(true); }}
         className="bg-zppia-surface font-inter text-[12px] text-white border border-border rounded-lg px-2 py-1 focus:outline-none">
         <option value="locked">Bloqueado</option>
@@ -78,6 +82,7 @@ function ModulePanel({ mod }: { mod: any }) {
       title: 'Nova Aula',
       duration: '0min',
       video_url: '',
+      cover_url: '',
       objectives: [],
       summary: '',
       task: '',
