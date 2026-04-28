@@ -23,6 +23,10 @@ const Footer = () => (
 
         <div className="text-muted-foreground text-xs text-center md:text-right">
           <p>CNPJ: 60.355.549/0001-20</p>
+          <div className="flex flex-col md:items-end gap-1 mb-2">
+            <Link to="/privacidade" className="hover:text-primary transition-colors">Política de Privacidade</Link>
+            <Link to="/seguranca" className="hover:text-primary transition-colors">Segurança da Informação</Link>
+          </div>
           <p>© {new Date().getFullYear()} Liberty Agency. Todos os direitos reservados.</p>
         </div>
       </div>

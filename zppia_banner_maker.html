@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZPPIA PROMPTs - Banner Maker (SAFE ZONE FIX)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00E5FF;
+            --bg: #020617;
+        }
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        .container {
+            max-width: 1200px;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.2);
+            max-width: 100%;
+            height: auto;
+            background: var(--bg);
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 16px;
+        }
+        button {
+            background: var(--primary);
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--primary);
+        }
+        button.secondary {
+            background: #475569;
+            color: white;
+        }
+        input {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 200px;
+        }
+        .status-badge {
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="status-badge">YOUTUBE SAFE-ZONE OPTIMIZED</div>
+        <h1 style="font-family: 'Orbitron'; color: var(--primary); margin: 0 0 20px 0;">ZPPIA BANNER MAKER v2</h1>
+        
+        <div class="controls">
+            <input type="text" id="nameInput" value="RONNY" placeholder="Seu Nome">
+            <input type="text" id="tagInput" value="ZPPIA PROMPTs" placeholder="Seu Método">
+            <button onclick="downloadBanner()">Baixar Capa (2560x1440)</button>
+            <button class="secondary" onclick="toggleGuides()">Ocultar Guias</button>
+        </div>
+
+        <div style="margin-top: 20px; position: relative;">
+            <canvas id="bannerCanvas" width="2560" height="1440"></canvas>
+            <p style="color: #64748b; font-size: 12px; margin-top: 10px;">
+                Dica: O conteúdo dentro da faixa central é o que aparece em TODOS os dispositivos (Celular, Tablet e PC).
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bannerCanvas');
+        const ctx = canvas.getContext('2d');
+        const nameInput = document.getElementById('nameInput');
+        const tagInput = document.getElementById('tagInput');
+        let showGuides = true;
+
+        // YouTube Safe Area Specs
+        const SAFE_WIDTH = 1546;
+        const SAFE_HEIGHT = 423;
+        const SAFE_X = (canvas.width - SAFE_WIDTH) / 2;
+        const SAFE_Y = (canvas.height - SAFE_HEIGHT) / 2;
+
+        function toggleGuides() {
+            showGuides = !showGuides;
+            draw();
+        }
+
+        function draw() {
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // 1. Background
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Global Grid (Faint)
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.03)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=100) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let j=0; j<canvas.height; j+=100) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+            }
+
+            // 3. SAFE ZONE BACKGROUND (The strip visible on desktop/mobile)
+            ctx.fillStyle = '#060b18';
+            ctx.fillRect(0, SAFE_Y, canvas.width, SAFE_HEIGHT);
+
+            // 4. Content (Always inside SAFE_HEIGHT)
+            ctx.textAlign = 'center';
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#00E5FF';
+            
+            // Name & Tag
+            ctx.fillStyle = 'white';
+            ctx.font = '900 130px Orbitron';
+            const name = nameInput.value.toUpperCase();
+            const tag = tagInput.value.toUpperCase();
+            ctx.fillText(name + ' | ' + tag, canvas.width/2, canvas.height/2 + 10);
+            
+            // Slogan (Slightly lower but still safe)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#00E5FF';
+            ctx.font = '900 32px Orbitron';
+            ctx.letterSpacing = "15px";
+            ctx.fillText("DOMINE O REALISMO ABSOLUTO", canvas.width/2, canvas.height/2 + 100);
+
+            // 5. HUD Decorative Elements (inside Safe Zone)
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+            ctx.lineWidth = 2;
+            
+            // Central Bars
+            ctx.beginPath(); ctx.moveTo(canvas.width/2 - 400, canvas.height/2 + 130); ctx.lineTo(canvas.width/2 + 400, canvas.height/2 + 130); ctx.stroke();
+            
+            // Side Accents (Safe for Mobile - within 1280px central)
+            const mobileSafe = 1280;
+            const msX = (canvas.width - mobileSafe) / 2;
+            
+            ctx.beginPath(); ctx.moveTo(msX, SAFE_Y + 50); ctx.lineTo(msX + 50, SAFE_Y + 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(msX, SAFE_Y + 50); ctx.lineTo(msX, SAFE_Y + 100); ctx.stroke();
+            
+            ctx.beginPath(); ctx.moveTo(canvas.width - msX, SAFE_Y + 50); ctx.lineTo(canvas.width - msX - 50, SAFE_Y + 50); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(canvas.width - msX, SAFE_Y + 50); ctx.lineTo(canvas.width - msX, SAFE_Y + 100); ctx.stroke();
+
+            // 6. GUIDES (Only if active)
+            if (showGuides) {
+                // Safe Zone Overlay
+                ctx.strokeStyle = '#ef4444';
+                ctx.setLineDash([10, 10]);
+                ctx.lineWidth = 2;
+                
+                // Mobile Safe Box (Center 1546x423)
+                ctx.strokeRect(SAFE_X, SAFE_Y, SAFE_WIDTH, SAFE_HEIGHT);
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 20px Inter';
+                ctx.setLineDash([]);
+                ctx.textAlign = 'left';
+                ctx.fillText("ÁREA SEGURA (CELULAR/PC)", SAFE_X + 20, SAFE_Y + 40);
+                
+                // Tint non-visible areas
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(0, 0, canvas.width, SAFE_Y); // Top
+                ctx.fillRect(0, SAFE_Y + SAFE_HEIGHT, canvas.width, SAFE_Y); // Bottom
+                ctx.fillRect(0, SAFE_Y, SAFE_X, SAFE_HEIGHT); // Left
+                ctx.fillRect(SAFE_X + SAFE_WIDTH, SAFE_Y, SAFE_X, SAFE_HEIGHT); // Right
+            }
+        }
+
+        function downloadBanner() {
+            // Hide guides before export
+            const oldGuides = showGuides;
+            showGuides = false;
+            draw();
+            
+            const link = document.createElement('a');
+            link.download = 'capa-zppia-youtube-final.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Restore guides
+            showGuides = oldGuides;
+            draw();
+        }
+
+        nameInput.addEventListener('input', draw);
+        tagInput.addEventListener('input', draw);
+        
+        // Initial Draw
+        setTimeout(draw, 500);
+    </script>
+</body>
+</html>
