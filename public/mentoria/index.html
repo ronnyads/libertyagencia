@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicação Mentoria - Liberty Company</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset & Variables */
+        :root {
+            --bg-dark: #020617;
+            --bg-card: rgba(15, 23, 42, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #00E5FF;
+            --accent-violet: #7C0DF2;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(124, 13, 242, 0.05), transparent 25%);
+        }
+
+        /* Typography */
+        h1, h2, h3 { line-height: 1.2; }
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 1rem; }
+        h2 { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; margin-bottom: 1.5rem; }
+        .gradient-text {
+            background: linear-gradient(90deg, var(--accent-cyan), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Layout */
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        section { padding: 100px 0; }
+
+        /* Navbar */
+        nav {
+            padding: 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 1px; }
+        .logo span { color: var(--accent-cyan); }
+
+        /* Hero */
+        .hero { text-align: center; padding: 120px 0 80px; }
+        .hero p { font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 40px; font-weight: 300; }
+
+        /* Buttons (Touch Targets min 44px) */
+        .btn {
+            display: inline-block;
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 40px;
+            border-radius: 4px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+            min-height: 50px;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+            background: #fff;
+        }
+
+        /* Grid Cards (Glassmorphism) */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 40px; }
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-violet);
+        }
+        .card h3 { font-size: 1.25rem; margin-bottom: 12px; color: #fff; }
+        .card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Guarantee Box */
+        .guarantee {
+            background: rgba(0, 229, 255, 0.03);
+            border: 1px solid var(--accent-cyan);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        /* Application Form Section */
+        .form-section {
+            background: #0f172a;
+            padding: 80px 0;
+            border-top: 1px solid var(--border-color);
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-dark);
+            padding: 50px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .form-group { margin-bottom: 24px; text-align: left; }
+        label { display: block; font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        input, select, textarea {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+        
+        .checkbox-group { display: flex; align-items: flex-start; gap: 12px; margin-top: 30px; margin-bottom: 30px;}
+        .checkbox-group input { width: auto; margin-top: 4px; cursor: pointer; }
+        .checkbox-group label { text-transform: none; font-weight: 400; font-size: 0.85rem; line-height: 1.5; cursor: pointer;}
+        .checkbox-group label a { color: var(--accent-cyan); text-decoration: none; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .hero { padding: 80px 0 40px; }
+            .form-container { padding: 30px 20px; }
+            section { padding: 60px 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="container">
+        <div class="logo">LIBERTY<span> COMPANY</span></div>
+        <a href="#aplicar" class="btn" style="padding: 10px 24px; font-size: 0.8rem;">Aplicar Agora</a>
+    </nav>
+
+    <header class="hero container">
+        <h1>Operação <span class="gradient-text">Escalável</span></h1>
+        <p>A mentoria premium de 90 dias que transforma seu negócio em um ecossistema de vendas multiplataforma. Shopee, Mercado Livre, TikTok Shop e Loja Própria.</p>
+        <a href="#aplicar" class="btn">Preencher Aplicação (Vagas Limitadas)</a>
+    </header>
+
+    <section class="container">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2>O Que Vamos Construir <span class="gradient-text">Juntos</span></h2>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Nós não vendemos cursos. Nós desenhamos a infraestrutura do seu negócio em 4 pilares.</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3 style="color: var(--accent-cyan);">01. Marketplaces (SEO)</h3>
+                <p>Estratégias avançadas de ranqueamento, precificação e Ads para dominar as buscas na Shopee e Mercado Livre.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--accent-violet);">02. TikTok Shop</h3>
+                <p>Aproveite o algoritmo viral. Criativos de alta conversão e estratégias de afiliação para vender no automático.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: #fff;">03. E-commerce Próprio</h3>
+                <p>Controle total da jornada. Estruturação da sua loja virtual para tráfego direto e aumento de LTV do cliente.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: #94a3b8;">04. Inteligência Tática</h3>
+                <p>Checklists operacionais, indicação de ferramentas secretas e encontros ao vivo para análise de métricas e escala.</p>
+            </div>
+        </div>
+
+        <div class="guarantee">
+            <h2 style="margin-bottom: 10px;">A Promessa: R$ 20.000,00 ou <span class="gradient-text">Reembolso Total</span></h2>
+            <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto;">
+                Nós confiamos no método. Se você assistir todas as aulas, aplicar todos os checklists rigorosamente, investir o tráfego recomendado e não atingir um faturamento bruto mínimo de R$ 20.000 em 90 dias, nós devolvemos 100% do valor da mentoria.
+            </p>
+        </div>
+    </section>
+
+    <section id="aplicar" class="form-section">
+        <div class="container" style="text-align: center;">
+            <h2 style="margin-bottom: 10px;">Formulário de <span class="gradient-text">Aplicação</span></h2>
+            <p style="color: var(--text-muted); margin-bottom: 40px;">Investimento da Mentoria: R$ 5.000,00. Preencha os dados abaixo para nossa equipe avaliar seu perfil.</p>
+            
+            <div class="form-container">
+                <form id="applicationForm">
+                    <div class="form-group">
+                        <label for="name">Nome Completo</label>
+                        <input type="text" id="name" placeholder="Como devemos te chamar?" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="whatsapp">WhatsApp</label>
+                        <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="revenue">Qual o seu faturamento atual mensal?</label>
+                        <select id="revenue" required>
+                            <option value="" disabled selected>Selecione uma opção</option>
+                            <option value="Zero (Estou começando)">Zero (Estou começando agora)</option>
+                            <option value="Até R$ 5.000">Até R$ 5.000</option>
+                            <option value="De R$ 5k a R$ 20k">De R$ 5.000 a R$ 20.000</option>
+                            <option value="Mais de R$ 20k">Mais de R$ 20.000</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="goal">Por que você quer entrar nesta mentoria?</label>
+                        <textarea id="goal" rows="4" placeholder="Conte um pouco sobre o seu desafio atual..." required></textarea>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">Estou ciente de que a mentoria exige dedicação e aplicação prática, e aceito os <a href="#" onclick="alert('Os termos jurídicos preveem que a garantia de reembolso de R$ 20k só é válida se o aluno executar 100% dos checklists, comparecer às calls e investir em anúncios. A mentoria custa R$ 5.000.')">Termos de Compromisso e Garantia</a>.</label>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%;">Enviar Aplicação</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 40px 0; color: var(--text-muted); border-top: 1px solid var(--border-color);">
+        <div class="logo" style="margin-bottom: 10px; font-size: 1.2rem;">LIBERTY<span> COMPANY</span></div>
+        <p style="font-size: 0.8rem;">© 2026 Liberty Company Ads. CNPJ: 60.355.549/0001-20</p>
+    </footer>
+
+    <script>
+        // Simulando o envio para o WhatsApp do Ronny
+        document.getElementById('applicationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const revenue = document.getElementById('revenue').value;
+            
+            // Aqui em um cenário real enviaria para um banco de dados (Supabase) 
+            // e redirecionaria o cliente para uma tela de sucesso ou WhatsApp.
+            
+            const text = `Olá, Liberty! Acabei de preencher a aplicação para a Mentoria de R$ 5k.%0A%0AMeu nome é: ${name}%0AMeu faturamento atual: ${revenue}%0A%0AAguardo o contato para fechar!`;
+            const whatsappUrl = `https://wa.me/5511999999999?text=${text}`; // Substitua pelo número real da agência
+            
+            alert('Aplicação enviada com sucesso! Você será redirecionado para o nosso WhatsApp.');
+            window.open(whatsappUrl, '_blank');
+        });
+    </script>
+</body>
+</html>
