@@ -16,6 +16,8 @@ const Obrigado = lazy(() => import("./pages/Obrigado"));
 const ZppiaQuiz = lazy(() => import("./pages/ZppiaQuiz"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const SecurityPolicy = lazy(() => import("./pages/SecurityPolicy"));
+const WhatsAppInbox = lazy(() => import("./pages/admin/WhatsAppInbox"));
+const WhatsAppTemplates = lazy(() => import("./pages/admin/WhatsAppTemplates"));
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
           <Route path="/form" element={<Suspense fallback={null}><LeadForm /></Suspense>} />
           <Route path="/mentoria-form" element={<Suspense fallback={null}><MentoriaForm /></Suspense>} />
           <Route path="/admin" element={<Suspense fallback={null}><AdminPanel /></Suspense>} />
+          <Route path="/admin/whatsapp/inbox" element={<Suspense fallback={null}><WhatsAppInbox /></Suspense>} />
+          <Route path="/admin/whatsapp/templates" element={<Suspense fallback={null}><WhatsAppTemplates /></Suspense>} />
           <Route path="/obrigado" element={<Suspense fallback={null}><Obrigado /></Suspense>} />
           <Route path="/zppia-prompts" element={<Suspense fallback={null}><ZppiaQuiz /></Suspense>} />
           <Route path="/privacidade" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
