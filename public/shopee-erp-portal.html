@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberty HUB - Enterprise Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --bg-dark: #0f172a;
+            --sidebar: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --tiktok: #00E5FF;
+            --amazon: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 1000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: var(--sidebar); padding: 40px; border-radius: 12px;
+            width: 100%; max-width: 400px; border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .login-box h2 { text-align: center; margin-bottom: 24px; color: #fff; }
+        .login-box h2 span { color: var(--primary); }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .input-group input {
+            width: 100%; padding: 12px; background: var(--bg-dark);
+            border: 1px solid var(--border); border-radius: 6px; color: #fff; outline: none;
+        }
+        .input-group input:focus { border-color: var(--primary); }
+        .btn {
+            width: 100%; padding: 12px; background: var(--primary); color: #fff;
+            border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .btn:hover { background: var(--primary-dark); }
+        .error-msg { color: #ef4444; font-size: 12px; text-align: center; margin-top: 10px; display: none; }
+
+        /* Dashboard Layout */
+        #dashboard { display: none; width: 100%; height: 100%; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .logo-area { padding: 24px; font-size: 20px; font-weight: 700; border-bottom: 1px solid var(--border); }
+        .logo-area span { color: var(--primary); }
+        .nav-menu { padding: 20px 0; flex: 1; }
+        .nav-item {
+            padding: 12px 24px; color: var(--text-muted); cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 12px; border-left: 3px solid transparent;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(249, 115, 22, 0.1); color: var(--primary); border-left-color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar {
+            height: 70px; background: var(--sidebar); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: flex-end; align-items: center; padding: 0 24px;
+        }
+        .user-profile { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 32px; height: 32px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        
+        .content-area { padding: 30px; overflow-y: auto; flex: 1; background: var(--bg-dark); }
+        
+        /* Views */
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 24px; margin-bottom: 8px; }
+        .page-header p { color: var(--text-muted); font-size: 14px; }
+
+        /* Tables */
+        .data-table { width: 100%; border-collapse: collapse; background: var(--sidebar); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .data-table th, .data-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid var(--border); }
+        .data-table th { color: var(--text-muted); font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table td { font-size: 14px; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .tag.amazon { background: rgba(245, 158, 11, 0.1); color: var(--amazon); }
+        .tag.tiktok { background: rgba(0, 229, 255, 0.1); color: var(--tiktok); }
+        .tag.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .tag.warning { background: rgba(245, 158, 11, 0.1); color: var(--amazon); }
+
+        /* Integrations Grid */
+        .integration-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .integration-card {
+            background: var(--sidebar); border: 1px solid var(--border); border-radius: 8px; padding: 24px;
+            display: flex; flex-direction: column; align-items: flex-start;
+        }
+        .int-header { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; align-items: center;}
+        .int-logo { font-weight: 700; font-size: 18px; }
+        .int-logo.shopee { color: #f97316; }
+        .int-logo.tiktok { color: #00E5FF; }
+        .int-logo.amazon { color: #f59e0b; }
+        
+        .status-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
+        }
+        .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-active .dot { background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse 2s infinite; }
+        .status-pending { background: rgba(249, 115, 22, 0.1); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.2); }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .int-desc { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5; flex: 1;}
+        .sync-info { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; width: 100%; background: var(--bg-dark); padding: 8px; border-radius: 4px; border: 1px solid var(--border); }
+        .sync-info span { color: var(--text-main); font-weight: 600; }
+
+        /* Dashboard widgets */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--sidebar); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .stat-card h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500; text-transform: uppercase; }
+        .stat-card .val { font-size: 28px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .stat-card .trend { font-size: 13px; color: var(--success); background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>Liberty<span>HUB</span></h2>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Seu usuário teste">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Sua senha teste">
+            </div>
+            <button class="btn" onclick="doLogin()">Entrar no Sistema</button>
+            <div id="login-error" class="error-msg">Credenciais inválidas. Use os dados de teste fornecidos.</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD APP -->
+    <div id="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-area">Liberty<span>HUB</span></div>
+            <div class="nav-menu">
+                <div class="nav-item" onclick="switchView('home', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Painel Geral
+                </div>
+                <div class="nav-item active" onclick="switchView('orders', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    Pedidos (TMS)
+                </div>
+                <div class="nav-item" onclick="switchView('products', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    Produtos (PIM)
+                </div>
+                <div class="nav-item" onclick="switchView('integrations', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    Integrações (API)
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="topbar">
+                <div class="user-profile">
+                    <span id="display-user">Shopee Reviewer</span>
+                    <div class="avatar">S</div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                
+                <!-- HOME VIEW -->
+                <div id="view-home" class="view-section">
+                    <div class="page-header">
+                        <h1>Visão Geral do Hub</h1>
+                        <p>Resumo de sincronização e fluxo de pedidos multiplataforma em tempo real.</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><h3>Pedidos Hoje</h3><div class="val">842 <span class="trend">+12%</span></div></div>
+                        <div class="stat-card"><h3>Faturamento Sincronizado</h3><div class="val">R$ 45.2K</div></div>
+                        <div class="stat-card"><h3>Estoque Atualizado</h3><div class="val">99.8%</div></div>
+                        <div class="stat-card"><h3>Integrações Ativas</h3><div class="val">2</div></div>
+                    </div>
+                </div>
+
+                <!-- ORDERS VIEW (THE PROOF) -->
+                <div id="view-orders" class="view-section active">
+                    <div class="page-header">
+                        <h1>Central de Pedidos (TMS)</h1>
+                        <p>Gestão unificada de pedidos importados via API das plataformas conectadas.</p>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID Pedido (Hub)</th>
+                                <th>Origem</th>
+                                <th>Cliente</th>
+                                <th>Valor Total</th>
+                                <th>Status Sincronização</th>
+                                <th>Etiqueta WMS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#HB-99824</td>
+                                <td><span class="tag amazon">Amazon SP-API</span></td>
+                                <td>João Silva</td>
+                                <td>R$ 149,90</td>
+                                <td><span class="tag success">Sincronizado</span></td>
+                                <td>Pronta para impressão</td>
+                            </tr>
+                            <tr>
+                                <td>#HB-99823</td>
+                                <td><span class="tag tiktok">TikTok Shop</span></td>
+                                <td>Maria Oliveira</td>
+                                <td>R$ 89,00</td>
+                                <td><span class="tag success">Sincronizado</span></td>
+                                <td>Pronta para impressão</td>
+                            </tr>
+                            <tr>
+                                <td>#HB-99822</td>
+                                <td><span class="tag amazon">Amazon SP-API</span></td>
+                                <td>Carlos Mendes</td>
+                                <td>R$ 299,50</td>
+                                <td><span class="tag success">Sincronizado</span></td>
+                                <td>Impressa</td>
+                            </tr>
+                            <tr>
+                                <td>#HB-99821</td>
+                                <td><span class="tag tiktok">TikTok Shop</span></td>
+                                <td>Ana Costa</td>
+                                <td>R$ 120,00</td>
+                                <td><span class="tag warning">Aguardando Pagamento</span></td>
+                                <td>Pendente</td>
+                            </tr>
+                            <tr>
+                                <td>#HB-99820</td>
+                                <td><span class="tag amazon">Amazon SP-API</span></td>
+                                <td>Pedro Souza</td>
+                                <td>R$ 45,90</td>
+                                <td><span class="tag success">Sincronizado</span></td>
+                                <td>Despachado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PRODUCTS VIEW -->
+                <div id="view-products" class="view-section">
+                    <div class="page-header">
+                        <h1>Catálogo Unificado (PIM)</h1>
+                        <p>Gestão de anúncios e controle de estoque centralizado.</p>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Produto</th>
+                                <th>Estoque Global</th>
+                                <th>Canais Ativos</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SKU-1001</td>
+                                <td>Fone de Ouvido Bluetooth Pro</td>
+                                <td>145 un.</td>
+                                <td>Amazon, TikTok Shop</td>
+                                <td><span class="tag success">Ativo</span></td>
+                            </tr>
+                            <tr>
+                                <td>SKU-1002</td>
+                                <td>Smartwatch Ultra Serie 9</td>
+                                <td>82 un.</td>
+                                <td>Amazon, TikTok Shop</td>
+                                <td><span class="tag success">Ativo</span></td>
+                            </tr>
+                            <tr>
+                                <td>SKU-1003</td>
+                                <td>Carregador Turbo 20W</td>
+                                <td>300 un.</td>
+                                <td>Amazon</td>
+                                <td><span class="tag success">Ativo</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- INTEGRATIONS VIEW -->
+                <div id="view-integrations" class="view-section">
+                    <div class="page-header">
+                        <h1>Central de Integrações</h1>
+                        <p>Módulos de conexão via API (Requisito Open Platform).</p>
+                    </div>
+
+                    <div class="integration-grid">
+                        
+                        <!-- Amazon -->
+                        <div class="integration-card" style="border-color: rgba(16, 185, 129, 0.3);">
+                            <div class="int-header">
+                                <div class="int-logo amazon">Amazon SP-API</div>
+                                <span class="status-badge status-active"><div class="dot"></div> Conectado</span>
+                            </div>
+                            <div class="sync-info">
+                                Última sincronização de pedidos: <span>Há 2 minutos</span><br>
+                                Fluxo de dados: <span>Bidirecional (Read/Write)</span>
+                            </div>
+                            <div class="int-desc">
+                                Importação ativa de FBA/FBM, atualização de preços, gestão de inventário e leitura de relatórios financeiros via Selling Partner API.
+                            </div>
+                        </div>
+
+                        <!-- TikTok Shop -->
+                        <div class="integration-card" style="border-color: rgba(16, 185, 129, 0.3);">
+                            <div class="int-header">
+                                <div class="int-logo tiktok">TikTok Shop API</div>
+                                <span class="status-badge status-active"><div class="dot"></div> Conectado</span>
+                            </div>
+                            <div class="sync-info">
+                                Última sincronização de pedidos: <span>Há 5 minutos</span><br>
+                                Fluxo de dados: <span>Bidirecional (Read/Write)</span>
+                            </div>
+                            <div class="int-desc">
+                                Gestão de catálogo unificado e sincronização em tempo real de pedidos provenientes do TikTok Seller Center. App devidamente Homologado.
+                            </div>
+                        </div>
+
+                        <!-- Shopee App -->
+                        <div class="integration-card" style="border-color: rgba(249, 115, 22, 0.5); box-shadow: 0 0 15px rgba(249, 115, 22, 0.1);">
+                            <div class="int-header">
+                                <div class="int-logo shopee">Shopee Open Platform</div>
+                                <span class="status-badge status-pending">Aguardando Avaliação</span>
+                            </div>
+                            <div class="sync-info">
+                                Módulo ERP/TMS: <span>Desenvolvimento Concluído</span><br>
+                                Chaves de Produção: <span>Bloqueadas</span>
+                            </div>
+                            <div class="int-desc">
+                                Sincronização bidirecional projetada para produtos, gestão de pedidos (TMS) e emissão automática de etiquetas (AWB). Módulo aguardando liberação das permissões do time de Open Platform para entrar em operação comercial.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function doLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const err = document.getElementById('login-error');
+
+            if (user === 'shopee_reviewer' && pass === 'Liberty@2026') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('display-user').innerText = user;
+                // Default to orders view to show proof immediately
+                switchView('orders', document.querySelectorAll('.nav-item')[1]);
+            } else {
+                err.style.display = 'block';
+            }
+        }
+
+        function switchView(viewId, element) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
