@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { supabase } from '@/lib/supabase'
-import { templateDemoGratuita } from '@/lib/email-templates'
+import { sendLeadToCrm } from '@/lib/crm-leads'
 
 export interface CreateLeadData {
   nome: string
@@ -18,29 +17,7 @@ export interface CreateLeadData {
 export function useCreateLead() {
   return useMutation({
     mutationFn: async (data: CreateLeadData) => {
-      const { error } = await supabase.from('leads').insert([{
-        nome: data.nome,
-        whatsapp: data.whatsapp,
-        faturamento: data.faturamento,
-        email: data.email || null,
-        instagram: data.instagram || null,
-        servico_interesse: data.servico_interesse || null,
-        utm_source: data.utm_source || null,
-        utm_medium: data.utm_medium || null,
-        utm_campaign: data.utm_campaign || null,
-        status: 'novo',
-      }])
-      if (error) {
-        if (error.code === '23505') throw new Error('duplicate')
-        throw error
-      }
-
-      if (data.email) {
-        const { subject, html } = templateDemoGratuita(data.nome, data.whatsapp)
-        await supabase.functions.invoke('send-email', {
-          body: { to: data.email, subject, html },
-        })
-      }
+      return sendLeadToCrm({ form_type: 'lead', ...data })
     },
     onError: () => {
       toast.error('Erro ao enviar formulario. Tente novamente.')
