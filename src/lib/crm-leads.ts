@@ -1,5 +1,5 @@
 export interface CrmLeadPayload {
-  form_type: 'lead' | 'mentoria'
+  form_type: 'lead' | 'mentoria' | 'recrutamento_sdr'
   nome: string
   whatsapp: string
   email?: string
@@ -16,6 +16,16 @@ export interface CrmLeadPayload {
   horas_semana?: string
   tem_investimento?: string
   consentimento?: boolean
+  cidade_estado?: string
+  perfil_profissional_url?: string
+  situacao_profissional?: string
+  experiencia_b2b?: string
+  canais_prospeccao?: string
+  ferramentas_crm?: string
+  disponibilidade?: string
+  conforto_metas?: string
+  resultado_comercial?: string
+  motivo_candidatura?: string
 }
 
 export async function sendLeadToCrm(payload: CrmLeadPayload) {

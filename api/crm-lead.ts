@@ -49,14 +49,46 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const email = text('email', 254)?.toLowerCase() || null
     const serviceInterest = text('servico_interesse', 200)
     const isLiberteC = serviceInterest?.toLowerCase().includes('liberte-c') === true
+    const isRecruitment = formType === 'recrutamento_sdr'
     const consentAccepted = raw?.consentimento === true
-    if (!requestId || !/^[0-9a-f-]{36}$/i.test(requestId) || !['lead', 'mentoria'].includes(formType || '') ||
+    if (!requestId || !/^[0-9a-f-]{36}$/i.test(requestId) || !['lead', 'mentoria', 'recrutamento_sdr'].includes(formType || '') ||
         !nome || normalizedWhatsapp.length < 10 || normalizedWhatsapp.length > 15 ||
         (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       return reply(res, 400, { error: 'Dados do formulário inválidos' })
     }
 
-    const opportunity = isLiberteC
+    if (isRecruitment) {
+      const requiredRecruitmentFields = [
+        text('cidade_estado', 160),
+        text('situacao_profissional', 200),
+        text('experiencia_b2b', 200),
+        text('canais_prospeccao', 500),
+        text('ferramentas_crm', 500),
+        text('disponibilidade', 200),
+        text('conforto_metas', 300),
+      ]
+      const profileUrl = text('perfil_profissional_url', 500)
+      const motivation = text('motivo_candidatura', 1500)
+      let validProfileUrl = false
+      try {
+        const parsedUrl = new URL(profileUrl || '')
+        validProfileUrl = ['http:', 'https:'].includes(parsedUrl.protocol)
+      } catch {
+        validProfileUrl = false
+      }
+      if (!email || requiredRecruitmentFields.some((value) => !value) || !validProfileUrl ||
+          !motivation || motivation.length < 80 || !consentAccepted) {
+        return reply(res, 400, { error: 'Dados da candidatura inválidos' })
+      }
+    }
+
+    const opportunity = isRecruitment
+      ? {
+          pipelineName: 'Recrutamento — SDR',
+          title: `Vaga SDR — ${nome}`,
+          origin: 'formulario_recrutamento_sdr',
+        }
+      : isLiberteC
       ? {
           pipelineName: 'Lista de espera',
           title: `LIBERTE-C — ${nome}`,
@@ -115,8 +147,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const { data: submission, error: ledgerError } = await crm.from('form_lead_submissions').insert({
       tenant_id: tenantId,
       request_id: requestId,
-      form_type: formType,
-      source: 'liberty_agencia',
+      form_type: isRecruitment ? 'lead' : formType,
+      source: isRecruitment ? 'liberty_agencia_recruitment' : 'liberty_agencia',
     }).select('id').single()
     if (ledgerError?.code === '23505') return reply(res, 200, { ok: true, duplicate: true })
     if (ledgerError || !submission) throw new Error(`ledger:${ledgerError?.code || 'missing'}`)
@@ -132,7 +164,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     const details = [
-      `Formulário: ${formType === 'mentoria' ? 'Mentoria' : isLiberteC ? 'Lista de espera LIBERTE-C Mercado Livre' : 'Diagnóstico comercial'}`,
+      `Formulário: ${isRecruitment ? 'Candidatura — Vaga SDR' : formType === 'mentoria' ? 'Mentoria' : isLiberteC ? 'Lista de espera LIBERTE-C Mercado Livre' : 'Diagnóstico comercial'}`,
       `Nome: ${nome}`,
       `WhatsApp: ${normalizedWhatsapp}`,
       email ? `E-mail: ${email}` : null,
@@ -144,12 +176,22 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       text('objetivo', 2000) ? `Objetivo: ${text('objetivo', 2000)}` : null,
       text('horas_semana', 200) ? `Disponibilidade: ${text('horas_semana', 200)}` : null,
       text('tem_investimento', 200) ? `Investimento: ${text('tem_investimento', 200)}` : null,
-      isLiberteC ? `Consentimento de contato e privacidade: ${consentAccepted ? 'Aceito' : 'Não informado'}` : null,
+      text('cidade_estado', 160) ? `Cidade/estado: ${text('cidade_estado', 160)}` : null,
+      text('perfil_profissional_url', 500) ? `LinkedIn/currículo: ${text('perfil_profissional_url', 500)}` : null,
+      text('situacao_profissional', 200) ? `Situação profissional: ${text('situacao_profissional', 200)}` : null,
+      text('experiencia_b2b', 200) ? `Experiência em vendas B2B: ${text('experiencia_b2b', 200)}` : null,
+      text('canais_prospeccao', 500) ? `Canais de prospecção: ${text('canais_prospeccao', 500)}` : null,
+      text('ferramentas_crm', 500) ? `Ferramentas/CRMs: ${text('ferramentas_crm', 500)}` : null,
+      text('disponibilidade', 200) ? `Disponibilidade: ${text('disponibilidade', 200)}` : null,
+      text('conforto_metas', 300) ? `Metas e comissão: ${text('conforto_metas', 300)}` : null,
+      text('resultado_comercial', 1500) ? `Principal resultado comercial: ${text('resultado_comercial', 1500)}` : null,
+      text('motivo_candidatura', 1500) ? `Motivo da candidatura: ${text('motivo_candidatura', 1500)}` : null,
+      (isLiberteC || isRecruitment) ? `Consentimento de contato e privacidade: ${consentAccepted ? 'Aceito' : 'Não informado'}` : null,
       text('utm_source', 200) ? `UTM source: ${text('utm_source', 200)}` : null,
       text('utm_medium', 200) ? `UTM medium: ${text('utm_medium', 200)}` : null,
       text('utm_campaign', 200) ? `UTM campaign: ${text('utm_campaign', 200)}` : null,
     ].filter(Boolean).join('\n')
-    const service = formType === 'mentoria' ? 'Mentoria Liberty' : (serviceInterest || 'Diagnóstico Liberty Agência')
+    const service = isRecruitment ? 'Vaga SDR — Liberty Company' : formType === 'mentoria' ? 'Mentoria Liberty' : (serviceInterest || 'Diagnóstico Liberty Agência')
     let leadId = typeof existing?.id === 'string' ? existing.id : null
 
     if (leadId) {
@@ -159,11 +201,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         email: email || existing?.email || null,
         instagram: text('instagram', 100)?.replace(/^@/, '') || existing?.instagram || null,
         faturamento: text('faturamento', 160) || existing?.faturamento || null,
-        servico_interesse: service,
+        servico_interesse: isRecruitment ? (existing?.servico_interesse || service) : service,
         observacoes: [existing?.observacoes, details].filter((value) => typeof value === 'string' && value.trim()).join('\n\n'),
-        utm_source: text('utm_source', 200),
-        utm_medium: text('utm_medium', 200),
-        utm_campaign: text('utm_campaign', 200),
+        utm_source: isRecruitment ? (existing?.utm_source || text('utm_source', 200)) : text('utm_source', 200),
+        utm_medium: isRecruitment ? (existing?.utm_medium || text('utm_medium', 200)) : text('utm_medium', 200),
+        utm_campaign: isRecruitment ? (existing?.utm_campaign || text('utm_campaign', 200)) : text('utm_campaign', 200),
         updated_at: new Date().toISOString(),
       }).eq('id', leadId).eq('tenant_id', tenantId)
       if (error) {
@@ -232,7 +274,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         tenant_id: tenantId,
         lead_id: leadId,
         tipo: 'outro',
-        titulo: formType === 'mentoria'
+        titulo: isRecruitment
+          ? 'Candidatura para vaga SDR recebida'
+          : formType === 'mentoria'
           ? 'Candidatura de mentoria recebida'
           : isLiberteC ? 'Inscrição na lista LIBERTE-C recebida' : 'Formulário do site recebido',
         descricao: details,
@@ -249,7 +293,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         origem: opportunity.origin,
       }))
     }
-    await Promise.all(followUpWrites)
+    const followUpResults = await Promise.all(followUpWrites)
+    const followUpError = followUpResults.find((result) => result.error)?.error
+    if (followUpError) {
+      await crm.from('form_lead_submissions').delete().eq('id', submission.id)
+      throw new Error(`follow_up:${followUpError.code}`)
+    }
 
     return reply(res, 200, { ok: true })
   } catch (error) {
