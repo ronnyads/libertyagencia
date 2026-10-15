@@ -12,7 +12,6 @@ import {
   Search,
   ShieldCheck,
   ShoppingCart,
-  Sparkles,
   Store,
   Target,
   TrendingUp,
@@ -138,8 +137,8 @@ export default function LiberteCMercadoLivre() {
         <div className="pointer-events-none absolute inset-0 opacity-[0.13]" style={{ backgroundImage: 'radial-gradient(#252525 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 md:px-8 lg:grid-cols-[1.08fr_.92fr]">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/15 bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] backdrop-blur">
-              <Sparkles size={15} className="text-[#3483FA]" /> Lista de espera aberta
+            <div className="mb-6 inline-flex items-center rounded-full border border-black/15 bg-white/70 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] backdrop-blur">
+              Lista de espera aberta
             </div>
             <div className="mb-7 flex items-center gap-3 text-xs font-bold uppercase tracking-[.14em] text-black/50">
               <span>Treinamento para</span>
@@ -307,7 +306,7 @@ export default function LiberteCMercadoLivre() {
       <section id="lista-de-espera" className="scroll-mt-0 bg-[#FFE600] py-16 md:py-24">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 md:px-8 lg:grid-cols-[.88fr_1.12fr] lg:items-start">
           <div className="lg:sticky lg:top-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#252525] px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-[#FFE600]"><Sparkles size={14} /> Lista de espera</div>
+            <div className="inline-flex items-center rounded-full bg-[#252525] px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-[#FFE600]">Lista de espera</div>
             <h2 className="mt-6 font-orbitron text-4xl font-black leading-[1.05] tracking-tight md:text-5xl">Seja avisado quando as vagas abrirem.</h2>
             <p className="mt-5 text-lg leading-relaxed text-black/65">Cadastre-se para receber as novidades e as condições de lançamento do LIBERTE-C Mercado Livre em primeira mão.</p>
             <div className="mt-8 space-y-4">
