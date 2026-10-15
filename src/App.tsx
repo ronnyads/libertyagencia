@@ -16,6 +16,7 @@ const Obrigado = lazy(() => import("./pages/Obrigado"));
 const ZppiaQuiz = lazy(() => import("./pages/ZppiaQuiz"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const SecurityPolicy = lazy(() => import("./pages/SecurityPolicy"));
+const LiberteCMercadoLivre = lazy(() => import("./pages/LiberteCMercadoLivre"));
 const WhatsAppInbox = lazy(() => import("./pages/admin/WhatsAppInbox"));
 const WhatsAppTemplates = lazy(() => import("./pages/admin/WhatsAppTemplates"));
 
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/zppia-prompts" element={<Suspense fallback={null}><ZppiaQuiz /></Suspense>} />
           <Route path="/privacidade" element={<Suspense fallback={null}><PrivacyPolicy /></Suspense>} />
           <Route path="/seguranca" element={<Suspense fallback={null}><SecurityPolicy /></Suspense>} />
+          <Route path="/liberte-c-mercado-livre" element={<Suspense fallback={null}><LiberteCMercadoLivre /></Suspense>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

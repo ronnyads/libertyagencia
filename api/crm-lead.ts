@@ -94,8 +94,10 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       existing = emailResult.data
     }
 
+    const serviceInterest = text('servico_interesse', 200)
+    const isLiberteC = serviceInterest?.toLowerCase().includes('liberte-c') === true
     const details = [
-      `Formulário: ${formType === 'mentoria' ? 'Mentoria' : 'Diagnóstico comercial'}`,
+      `Formulário: ${formType === 'mentoria' ? 'Mentoria' : isLiberteC ? 'Lista de espera LIBERTE-C Mercado Livre' : 'Diagnóstico comercial'}`,
       text('faturamento', 160) ? `Segmento/faturamento: ${text('faturamento', 160)}` : null,
       text('situacao') ? `Situação atual: ${text('situacao')}` : null,
       text('projeto', 2000) ? `Projeto: ${text('projeto', 2000)}` : null,
@@ -104,7 +106,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       text('horas_semana', 200) ? `Disponibilidade: ${text('horas_semana', 200)}` : null,
       text('tem_investimento', 200) ? `Investimento: ${text('tem_investimento', 200)}` : null,
     ].filter(Boolean).join('\n')
-    const service = formType === 'mentoria' ? 'Mentoria Liberty' : (text('servico_interesse', 200) || 'Diagnóstico Liberty Agência')
+    const service = formType === 'mentoria' ? 'Mentoria Liberty' : (serviceInterest || 'Diagnóstico Liberty Agência')
     let leadId = typeof existing?.id === 'string' ? existing.id : null
 
     if (leadId) {
@@ -152,7 +154,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         tenant_id: tenantId,
         lead_id: leadId,
         tipo: 'outro',
-        titulo: formType === 'mentoria' ? 'Candidatura de mentoria recebida' : 'Formulário do site recebido',
+        titulo: formType === 'mentoria'
+          ? 'Candidatura de mentoria recebida'
+          : isLiberteC ? 'Inscrição na lista LIBERTE-C recebida' : 'Formulário do site recebido',
         descricao: details,
         concluida: false,
       }),

@@ -40,6 +40,7 @@
     </noscript>
   <!-- Meta Pixel (dynamic) -->
   <script>
+    if (!window.location.pathname.startsWith('/liberte-c-mercado-livre')) {
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
     n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
@@ -54,6 +55,7 @@
       var pixelId = d && d[0] && d[0].valor;
       if(pixelId){fbq('init',pixelId);fbq('track','PageView');}
     }).catch(function(){});
+    }
   </script>
   <!-- End Meta Pixel -->
   </head>
