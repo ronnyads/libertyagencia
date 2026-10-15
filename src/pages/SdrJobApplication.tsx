@@ -27,8 +27,8 @@ const CHANNELS = ['Telefone', 'WhatsApp', 'E-mail', 'LinkedIn', 'Ainda não util
 const AVAILABILITY = ['Até 4 horas por dia', 'De 4 a 6 horas por dia', '8 horas por dia', 'Disponibilidade flexível']
 const TARGET_COMFORT = ['Sim, gosto de trabalhar com metas', 'Sim, desde que as metas estejam claras', 'Tenho pouca experiência, mas quero aprender']
 
-const inputClass = 'h-12 w-full rounded-xl border border-white/10 bg-white/[0.045] px-4 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-[#a8ff1a]/70 focus:ring-4 focus:ring-[#a8ff1a]/10'
-const textAreaClass = 'w-full resize-none rounded-xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm leading-relaxed text-white outline-none transition placeholder:text-white/30 focus:border-[#a8ff1a]/70 focus:ring-4 focus:ring-[#a8ff1a]/10'
+const inputClass = 'h-12 w-full rounded-xl border border-foreground/10 bg-background/55 px-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/55 focus:border-primary/70 focus:ring-4 focus:ring-primary/10'
+const textAreaClass = 'w-full resize-none rounded-xl border border-foreground/10 bg-background/55 px-4 py-3 text-sm leading-relaxed text-foreground outline-none transition placeholder:text-muted-foreground/55 focus:border-primary/70 focus:ring-4 focus:ring-primary/10'
 
 function FieldError({ message }: { message?: string }) {
   return message ? <p className="mt-1.5 text-xs text-red-300" role="alert">{message}</p> : null
@@ -133,16 +133,19 @@ export default function SdrJobApplication() {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#090b0d] font-inter text-white selection:bg-[#a8ff1a] selection:text-black">
-      <div aria-hidden="true" className="fixed inset-0 pointer-events-none opacity-35" style={{ backgroundImage: 'radial-gradient(circle at 20% 10%, rgba(168,255,26,.12), transparent 28%), radial-gradient(circle at 80% 75%, rgba(168,255,26,.07), transparent 28%), linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px)', backgroundSize: 'auto, auto, 36px 36px, 36px 36px' }} />
+    <main className="min-h-screen overflow-hidden bg-background font-inter text-foreground selection:bg-primary selection:text-primary-foreground">
+      <div aria-hidden="true" className="fixed inset-0 pointer-events-none">
+        <div className="grid-bg absolute inset-0 opacity-25" />
+        <div className="neon-orb absolute -left-24 top-10 h-[32rem] w-[32rem] opacity-60" />
+        <div className="absolute -right-32 top-[44rem] h-[30rem] w-[30rem] rounded-full bg-violet-600/[.08] blur-[120px]" />
+      </div>
 
-      <header className="relative z-20 border-b border-white/10 bg-[#090b0d]/90 backdrop-blur-xl">
+      <header className="relative z-20 border-b border-foreground/10 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:h-20 md:px-8">
           <Link to="/" className="flex items-center gap-3" aria-label="Voltar ao site da Liberty Company">
-            <span className="grid h-9 w-9 place-items-center bg-[#a8ff1a] text-lg font-black italic text-black [clip-path:polygon(22%_0,100%_0,76%_44%,100%_44%,18%_100%,38%_57%,0_57%)]">L</span>
-            <span className="text-sm font-black tracking-[.08em] md:text-base">LIBERTY <span className="font-normal text-white/70">COMPANY</span></span>
+            <span className="font-orbitron text-xl font-bold tracking-tighter">LIBERTY<span className="text-primary">.</span></span>
           </Link>
-          <a href="#candidatura" className="rounded-full border border-[#a8ff1a]/60 px-4 py-2 text-xs font-black uppercase tracking-[.12em] text-[#a8ff1a] transition hover:bg-[#a8ff1a] hover:text-black md:px-5">
+          <a href="#candidatura" className="rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-bold uppercase tracking-[.12em] text-primary transition hover:bg-primary hover:text-primary-foreground md:px-5">
             Candidatar-se
           </a>
         </div>
@@ -150,13 +153,13 @@ export default function SdrJobApplication() {
 
       <section className="relative z-10 mx-auto grid min-h-[720px] max-w-7xl items-center gap-12 px-5 py-16 md:px-8 lg:grid-cols-[1.12fr_.88fr] lg:py-24">
         <div>
-          <p className="mb-7 inline-flex items-center rounded-full border border-[#a8ff1a]/35 bg-[#a8ff1a]/10 px-4 py-2 text-[11px] font-black uppercase tracking-[.2em] text-[#a8ff1a]">
+          <p className="mb-7 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[.2em] text-primary">
             Processo seletivo aberto
           </p>
-          <h1 className="max-w-4xl text-5xl font-black uppercase leading-[.92] tracking-[-.055em] sm:text-6xl lg:text-[5.6rem]">
+          <h1 className="max-w-4xl font-orbitron text-5xl font-black uppercase leading-[.92] tracking-[-.055em] sm:text-6xl lg:text-[5.6rem]">
             Estamos<br />contratando
           </h1>
-          <div className="mt-7 inline-flex bg-[#a8ff1a] px-6 py-3 text-xl font-black uppercase tracking-tight text-black sm:text-2xl">
+          <div className="mt-7 inline-flex rounded-lg border border-primary/35 bg-primary/10 px-6 py-3 font-orbitron text-xl font-black uppercase tracking-tight text-primary shadow-[0_0_28px_-12px_rgba(0,212,255,.75)] sm:text-2xl">
             Vaga: SDR
           </div>
           <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/62 md:text-xl">
@@ -167,17 +170,17 @@ export default function SdrJobApplication() {
               <span key={item} className="rounded-full border border-white/15 bg-white/[.035] px-4 py-2 text-xs font-bold uppercase tracking-[.08em] text-white/80">{item}</span>
             ))}
           </div>
-          <a href="#candidatura" className="mt-10 inline-flex min-h-12 items-center gap-3 rounded-xl bg-[#a8ff1a] px-6 py-3 text-sm font-black uppercase tracking-[.08em] text-black transition hover:-translate-y-0.5 hover:bg-[#b8ff43] focus:outline-none focus:ring-4 focus:ring-[#a8ff1a]/25">
+          <a href="#candidatura" className="neon-button mt-10 inline-flex min-h-12 items-center gap-3 px-6 py-3 text-sm font-bold uppercase tracking-[.08em] focus:outline-none focus:ring-4 focus:ring-primary/25">
             Quero participar <ArrowRight size={18} aria-hidden="true" />
           </a>
         </div>
 
         <div className="relative mx-auto w-full max-w-[520px]">
-          <div aria-hidden="true" className="absolute -inset-8 bg-[#a8ff1a]/10 blur-[70px]" />
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-[#181b1e] to-[#0c0e10] p-6 shadow-2xl md:p-9">
-            <div className="absolute right-0 top-0 h-40 w-40 bg-[#a8ff1a]/10 blur-3xl" />
-            <p className="text-xs font-black uppercase tracking-[.2em] text-[#a8ff1a]">Sua missão</p>
-            <h2 className="mt-4 text-3xl font-black uppercase leading-tight tracking-[-.04em]">Transformar contatos em conversas que geram negócio.</h2>
+          <div aria-hidden="true" className="absolute -inset-8 bg-primary/10 blur-[70px]" />
+          <div className="glass-card-neon relative overflow-hidden p-6 md:p-9">
+            <div className="absolute right-0 top-0 h-40 w-40 bg-primary/10 blur-3xl" />
+            <p className="text-xs font-black uppercase tracking-[.2em] text-primary">Sua missão</p>
+            <h2 className="mt-4 font-orbitron text-3xl font-black uppercase leading-tight tracking-[-.04em]">Transformar contatos em conversas que geram negócio.</h2>
             <div className="mt-9 space-y-5">
               {[
                 [Target, 'Prospectar empresas com perfil para as soluções da Liberty.'],
@@ -186,7 +189,7 @@ export default function SdrJobApplication() {
                 [Laptop, 'Registrar atividades e manter o CRM organizado.'],
               ].map(([Icon, text]) => (
                 <div key={text as string} className="flex gap-4 border-t border-white/10 pt-5 first:border-0 first:pt-0">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#a8ff1a]/10 text-[#a8ff1a]"><Icon size={19} aria-hidden="true" /></div>
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Icon size={19} aria-hidden="true" /></div>
                   <p className="pt-1 text-sm leading-relaxed text-white/68">{text as string}</p>
                 </div>
               ))}
@@ -198,13 +201,13 @@ export default function SdrJobApplication() {
       <section className="relative z-10 border-y border-white/10 bg-white/[.025]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:px-8 lg:grid-cols-2 lg:py-24">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.2em] text-[#a8ff1a]">Quem pode se candidatar</p>
-            <h2 className="mt-4 text-3xl font-black uppercase leading-tight tracking-[-.035em] md:text-5xl">Experiência ajuda.<br />Atitude decide.</h2>
+            <p className="text-xs font-black uppercase tracking-[.2em] text-primary">Quem pode se candidatar</p>
+            <h2 className="mt-4 font-orbitron text-3xl font-black uppercase leading-tight tracking-[-.035em] md:text-5xl">Experiência ajuda.<br />Atitude decide.</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {['Comunicação clara e objetiva', 'Disciplina para rotina remota', 'Organização e constância', 'Interesse real por vendas B2B', 'Abertura para feedback', 'Vontade de aprender e evoluir'].map((item) => (
               <div key={item} className="flex min-h-20 items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/75">
-                <Check className="shrink-0 text-[#a8ff1a]" size={17} aria-hidden="true" /> {item}
+                <Check className="shrink-0 text-primary" size={17} aria-hidden="true" /> {item}
               </div>
             ))}
           </div>
@@ -214,26 +217,26 @@ export default function SdrJobApplication() {
       <section id="candidatura" className="relative z-10 scroll-mt-6 px-5 py-20 md:px-8 lg:py-28">
         <div className="mx-auto max-w-5xl">
           <div className="mb-10 max-w-2xl">
-            <p className="text-xs font-black uppercase tracking-[.2em] text-[#a8ff1a]">Candidatura</p>
-            <h2 className="mt-4 text-3xl font-black uppercase tracking-[-.04em] md:text-5xl">Conte por que você deve fazer parte do time.</h2>
+            <p className="text-xs font-black uppercase tracking-[.2em] text-primary">Candidatura</p>
+            <h2 className="mt-4 font-orbitron text-3xl font-black uppercase tracking-[-.04em] md:text-5xl">Conte por que você deve fazer parte do time.</h2>
             <p className="mt-4 text-sm leading-relaxed text-white/55">Preencha com atenção. Nosso time usará suas respostas para a primeira etapa da seleção.</p>
           </div>
 
           {submitted ? (
-            <div className="rounded-[2rem] border border-[#a8ff1a]/30 bg-[#a8ff1a]/[.055] p-8 text-center md:p-14" role="status">
-              <CheckCircle2 className="mx-auto text-[#a8ff1a]" size={52} strokeWidth={1.5} aria-hidden="true" />
-              <h3 className="mt-6 text-2xl font-black uppercase md:text-4xl">Candidatura recebida</h3>
+            <div className="glass-card-neon p-8 text-center md:p-14" role="status">
+              <CheckCircle2 className="mx-auto text-primary" size={52} strokeWidth={1.5} aria-hidden="true" />
+              <h3 className="mt-6 font-orbitron text-2xl font-black uppercase md:text-4xl">Candidatura recebida</h3>
               <p className="mx-auto mt-4 max-w-xl leading-relaxed text-white/60">Se o seu perfil avançar para a próxima etapa, nosso time entrará em contato pelo WhatsApp ou e-mail informado.</p>
-              <Link to="/" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-[#a8ff1a] hover:underline">Voltar ao site <ChevronRight size={16} /></Link>
+              <Link to="/" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline">Voltar ao site <ChevronRight size={16} /></Link>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#111417] shadow-[0_30px_100px_rgba(0,0,0,.4)]">
+            <div className="glass-card-neon overflow-hidden">
               <div className="border-b border-white/10 px-5 py-5 md:px-8">
                 <div className="mb-4 flex items-center justify-between text-xs font-bold uppercase tracking-[.1em]">
                   <span className="text-white/45">Etapa {step + 1} de {STEP_LABELS.length}</span>
-                  <span className="text-[#a8ff1a]">{STEP_LABELS[step]}</span>
+                  <span className="text-primary">{STEP_LABELS[step]}</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[#a8ff1a] transition-all duration-300" style={{ width: `${((step + 1) / STEP_LABELS.length) * 100}%` }} /></div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-primary shadow-[0_0_16px_rgba(0,212,255,.65)] transition-all duration-300" style={{ width: `${((step + 1) / STEP_LABELS.length) * 100}%` }} /></div>
               </div>
 
               <form onSubmit={submit} noValidate className="p-5 md:p-8 lg:p-10">
@@ -250,10 +253,10 @@ export default function SdrJobApplication() {
                 {step === 1 && (
                   <div className="space-y-6">
                     <div className="grid gap-5 md:grid-cols-2">
-                      <label><span className="mb-2 block text-sm font-bold">Situação profissional atual *</span><select className={inputClass} value={form.situacaoProfissional} onChange={(e) => update('situacaoProfissional', e.target.value)}><option value="" className="bg-[#111417]">Selecione</option>{SITUATIONS.map((item) => <option key={item} className="bg-[#111417]">{item}</option>)}</select><FieldError message={errors.situacaoProfissional} /></label>
-                      <label><span className="mb-2 block text-sm font-bold">Experiência com vendas B2B *</span><select className={inputClass} value={form.experienciaB2b} onChange={(e) => update('experienciaB2b', e.target.value)}><option value="" className="bg-[#111417]">Selecione</option>{EXPERIENCES.map((item) => <option key={item} className="bg-[#111417]">{item}</option>)}</select><FieldError message={errors.experienciaB2b} /></label>
+                      <label><span className="mb-2 block text-sm font-bold">Situação profissional atual *</span><select className={inputClass} value={form.situacaoProfissional} onChange={(e) => update('situacaoProfissional', e.target.value)}><option value="" className="bg-card">Selecione</option>{SITUATIONS.map((item) => <option key={item} className="bg-card">{item}</option>)}</select><FieldError message={errors.situacaoProfissional} /></label>
+                      <label><span className="mb-2 block text-sm font-bold">Experiência com vendas B2B *</span><select className={inputClass} value={form.experienciaB2b} onChange={(e) => update('experienciaB2b', e.target.value)}><option value="" className="bg-card">Selecione</option>{EXPERIENCES.map((item) => <option key={item} className="bg-card">{item}</option>)}</select><FieldError message={errors.experienciaB2b} /></label>
                     </div>
-                    <fieldset><legend className="mb-3 text-sm font-bold">Quais canais de prospecção você já utilizou? *</legend><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{CHANNELS.map((channel) => { const active = form.canais.includes(channel); return <button type="button" key={channel} aria-pressed={active} onClick={() => toggleChannel(channel)} className={`min-h-12 rounded-xl border px-4 py-3 text-left text-sm transition ${active ? 'border-[#a8ff1a] bg-[#a8ff1a]/10 text-[#c4ff67]' : 'border-white/10 bg-white/[.035] text-white/55 hover:border-white/25'}`}><span className="flex items-center gap-2">{active && <Check size={15} aria-hidden="true" />}{channel}</span></button> })}</div><FieldError message={errors.canais} /></fieldset>
+                    <fieldset><legend className="mb-3 text-sm font-bold">Quais canais de prospecção você já utilizou? *</legend><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{CHANNELS.map((channel) => { const active = form.canais.includes(channel); return <button type="button" key={channel} aria-pressed={active} onClick={() => toggleChannel(channel)} className={`min-h-12 rounded-xl border px-4 py-3 text-left text-sm transition ${active ? 'border-primary bg-primary/10 text-primary' : 'border-white/10 bg-white/[.035] text-white/55 hover:border-white/25'}`}><span className="flex items-center gap-2">{active && <Check size={15} aria-hidden="true" />}{channel}</span></button> })}</div><FieldError message={errors.canais} /></fieldset>
                     <label><span className="mb-2 block text-sm font-bold">Quais ferramentas ou CRMs você conhece? *</span><input className={inputClass} value={form.ferramentasCrm} onChange={(e) => update('ferramentasCrm', e.target.value.slice(0, 500))} placeholder="Ex.: HubSpot, Pipedrive, RD Station ou nenhuma" /><FieldError message={errors.ferramentasCrm} /></label>
                   </div>
                 )}
@@ -261,8 +264,8 @@ export default function SdrJobApplication() {
                 {step === 2 && (
                   <div className="space-y-6">
                     <div className="grid gap-5 md:grid-cols-2">
-                      <label><span className="mb-2 block text-sm font-bold">Disponibilidade diária *</span><select className={inputClass} value={form.disponibilidade} onChange={(e) => update('disponibilidade', e.target.value)}><option value="" className="bg-[#111417]">Selecione</option>{AVAILABILITY.map((item) => <option key={item} className="bg-[#111417]">{item}</option>)}</select><FieldError message={errors.disponibilidade} /></label>
-                      <label><span className="mb-2 block text-sm font-bold">Como você se sente trabalhando com metas e comissão? *</span><select className={inputClass} value={form.confortoMetas} onChange={(e) => update('confortoMetas', e.target.value)}><option value="" className="bg-[#111417]">Selecione</option>{TARGET_COMFORT.map((item) => <option key={item} className="bg-[#111417]">{item}</option>)}</select><FieldError message={errors.confortoMetas} /></label>
+                      <label><span className="mb-2 block text-sm font-bold">Disponibilidade diária *</span><select className={inputClass} value={form.disponibilidade} onChange={(e) => update('disponibilidade', e.target.value)}><option value="" className="bg-card">Selecione</option>{AVAILABILITY.map((item) => <option key={item} className="bg-card">{item}</option>)}</select><FieldError message={errors.disponibilidade} /></label>
+                      <label><span className="mb-2 block text-sm font-bold">Como você se sente trabalhando com metas e comissão? *</span><select className={inputClass} value={form.confortoMetas} onChange={(e) => update('confortoMetas', e.target.value)}><option value="" className="bg-card">Selecione</option>{TARGET_COMFORT.map((item) => <option key={item} className="bg-card">{item}</option>)}</select><FieldError message={errors.confortoMetas} /></label>
                     </div>
                     <label><span className="mb-2 block text-sm font-bold">Qual foi seu principal resultado comercial? <span className="font-normal text-white/35">(opcional)</span></span><textarea className={textAreaClass} rows={5} value={form.resultadoComercial} onChange={(e) => update('resultadoComercial', e.target.value.slice(0, 1500))} placeholder="Se ainda não trabalhou com vendas, conte uma situação em que precisou convencer, negociar ou atingir uma meta." /></label>
                   </div>
@@ -271,7 +274,7 @@ export default function SdrJobApplication() {
                 {step === 3 && (
                   <div className="space-y-6">
                     <label><span className="mb-2 block text-sm font-bold">Por que você está concorrendo a esta vaga? *</span><textarea className={textAreaClass} rows={8} value={form.motivoCandidatura} onChange={(e) => update('motivoCandidatura', e.target.value.slice(0, 1500))} placeholder="Conte por que a vaga faz sentido para você, o que deseja construir na área comercial e como pode contribuir com a Liberty." /><div className="mt-2 flex justify-between gap-3"><FieldError message={errors.motivoCandidatura} /><span className="ml-auto text-xs text-white/30">{form.motivoCandidatura.length}/1500</span></div></label>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[.03] p-4"><input type="checkbox" checked={form.consentimento} onChange={(e) => update('consentimento', e.target.checked)} className="mt-1 h-4 w-4 accent-[#a8ff1a]" /><span className="text-xs leading-relaxed text-white/55">Autorizo a Liberty Company a utilizar os dados informados para conduzir este processo seletivo e entrar em contato comigo. Li e concordo com a <Link to="/privacidade" target="_blank" className="font-bold text-[#a8ff1a] hover:underline">Política de Privacidade</Link>.</span></label>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[.03] p-4"><input type="checkbox" checked={form.consentimento} onChange={(e) => update('consentimento', e.target.checked)} className="mt-1 h-4 w-4 accent-cyan-400" /><span className="text-xs leading-relaxed text-white/55">Autorizo a Liberty Company a utilizar os dados informados para conduzir este processo seletivo e entrar em contato comigo. Li e concordo com a <Link to="/privacidade" target="_blank" className="font-bold text-primary hover:underline">Política de Privacidade</Link>.</span></label>
                     <FieldError message={errors.consentimento} />
                     {submitError && <p className="rounded-xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-200" role="alert">{submitError}</p>}
                   </div>
@@ -279,7 +282,7 @@ export default function SdrJobApplication() {
 
                 <div className="mt-9 flex flex-col-reverse gap-3 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
                   {step > 0 ? <button type="button" onClick={previousStep} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 text-sm font-bold text-white/70 transition hover:border-white/30 hover:text-white"><ArrowLeft size={17} /> Voltar</button> : <span />}
-                  <button type="submit" disabled={isSubmitting} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#a8ff1a] px-6 text-sm font-black uppercase tracking-[.06em] text-black transition hover:bg-[#b8ff43] disabled:cursor-wait disabled:opacity-60">{step === STEP_LABELS.length - 1 ? (isSubmitting ? 'Enviando...' : 'Enviar candidatura') : 'Continuar'} {!isSubmitting && <ArrowRight size={17} />}</button>
+                  <button type="submit" disabled={isSubmitting} className="neon-button inline-flex min-h-12 items-center justify-center gap-2 px-6 text-sm font-black uppercase tracking-[.06em] disabled:cursor-wait disabled:opacity-60">{step === STEP_LABELS.length - 1 ? (isSubmitting ? 'Enviando...' : 'Enviar candidatura') : 'Continuar'} {!isSubmitting && <ArrowRight size={17} />}</button>
                 </div>
               </form>
             </div>
@@ -289,9 +292,9 @@ export default function SdrJobApplication() {
 
       <section className="relative z-10 border-t border-white/10 px-5 py-16 md:px-8">
         <div className="mx-auto max-w-5xl">
-          <p className="text-center text-xs font-black uppercase tracking-[.2em] text-[#a8ff1a]">Como funciona</p>
+          <p className="text-center text-xs font-black uppercase tracking-[.2em] text-primary">Como funciona</p>
           <div className="mt-8 grid gap-4 md:grid-cols-4">
-            {['Candidatura', 'Triagem', 'Entrevista', 'Decisão'].map((item, index) => <div key={item} className="rounded-2xl border border-white/10 bg-white/[.025] p-5"><span className="text-xs font-black text-[#a8ff1a]">0{index + 1}</span><p className="mt-3 font-black uppercase tracking-tight">{item}</p></div>)}
+            {['Candidatura', 'Triagem', 'Entrevista', 'Decisão'].map((item, index) => <div key={item} className="glass-card p-5"><span className="text-xs font-black text-primary">0{index + 1}</span><p className="mt-3 font-orbitron font-black uppercase tracking-tight">{item}</p></div>)}
           </div>
           <p className="mx-auto mt-8 max-w-2xl text-center text-xs leading-relaxed text-white/35">O envio da candidatura não garante avanço no processo. Entraremos em contato apenas com os perfis selecionados para a próxima etapa.</p>
         </div>
