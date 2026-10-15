@@ -107,6 +107,7 @@ export default function LiberteCMercadoLivre() {
         servico_interesse: 'LIBERTE-C Mercado Livre — Lista de espera',
         situacao,
         objetivo: objetivo.trim() || undefined,
+        consentimento: consent,
         utm_source: campaign.source,
         utm_medium: campaign.medium,
         utm_campaign: campaign.name,

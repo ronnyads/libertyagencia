@@ -47,6 +47,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const whatsapp = (text('whatsapp', 40) || '').replace(/\D/g, '')
     const normalizedWhatsapp = (whatsapp.length === 10 || whatsapp.length === 11) ? `55${whatsapp}` : whatsapp
     const email = text('email', 254)?.toLowerCase() || null
+    const serviceInterest = text('servico_interesse', 200)
+    const isLiberteC = serviceInterest?.toLowerCase().includes('liberte-c') === true
+    const consentAccepted = raw?.consentimento === true
     if (!requestId || !/^[0-9a-f-]{36}$/i.test(requestId) || !['lead', 'mentoria'].includes(formType || '') ||
         !nome || normalizedWhatsapp.length < 10 || normalizedWhatsapp.length > 15 ||
         (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
@@ -56,6 +59,25 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const crm = createClient(supabaseUrl, supabaseSecret, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
+    let waitlistPipeline: { id: string; stageId: string } | null = null
+    if (isLiberteC) {
+      const { data: pipeline, error: pipelineError } = await crm.from('pipelines')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('nome', 'Lista de espera')
+        .limit(1)
+        .maybeSingle()
+      if (pipelineError || !pipeline) throw new Error(`waitlist_pipeline:${pipelineError?.code || 'missing'}`)
+
+      const { data: stage, error: stageError } = await crm.from('pipeline_etapas')
+        .select('id')
+        .eq('pipeline_id', pipeline.id)
+        .eq('nome', 'Novo')
+        .limit(1)
+        .maybeSingle()
+      if (stageError || !stage) throw new Error(`waitlist_stage:${stageError?.code || 'missing'}`)
+      waitlistPipeline = { id: pipeline.id, stageId: stage.id }
+    }
     const forwardedHeader = req.headers['x-forwarded-for']
     const clientAddress = (Array.isArray(forwardedHeader) ? forwardedHeader[0] : forwardedHeader)
       ?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown'
@@ -94,10 +116,12 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       existing = emailResult.data
     }
 
-    const serviceInterest = text('servico_interesse', 200)
-    const isLiberteC = serviceInterest?.toLowerCase().includes('liberte-c') === true
     const details = [
       `Formulário: ${formType === 'mentoria' ? 'Mentoria' : isLiberteC ? 'Lista de espera LIBERTE-C Mercado Livre' : 'Diagnóstico comercial'}`,
+      `Nome: ${nome}`,
+      `WhatsApp: ${normalizedWhatsapp}`,
+      email ? `E-mail: ${email}` : null,
+      serviceInterest ? `Interesse: ${serviceInterest}` : null,
       text('faturamento', 160) ? `Segmento/faturamento: ${text('faturamento', 160)}` : null,
       text('situacao') ? `Situação atual: ${text('situacao')}` : null,
       text('projeto', 2000) ? `Projeto: ${text('projeto', 2000)}` : null,
@@ -105,6 +129,10 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       text('objetivo', 2000) ? `Objetivo: ${text('objetivo', 2000)}` : null,
       text('horas_semana', 200) ? `Disponibilidade: ${text('horas_semana', 200)}` : null,
       text('tem_investimento', 200) ? `Investimento: ${text('tem_investimento', 200)}` : null,
+      isLiberteC ? `Consentimento de contato e privacidade: ${consentAccepted ? 'Aceito' : 'Não informado'}` : null,
+      text('utm_source', 200) ? `UTM source: ${text('utm_source', 200)}` : null,
+      text('utm_medium', 200) ? `UTM medium: ${text('utm_medium', 200)}` : null,
+      text('utm_campaign', 200) ? `UTM campaign: ${text('utm_campaign', 200)}` : null,
     ].filter(Boolean).join('\n')
     const service = formType === 'mentoria' ? 'Mentoria Liberty' : (serviceInterest || 'Diagnóstico Liberty Agência')
     let leadId = typeof existing?.id === 'string' ? existing.id : null
@@ -117,6 +145,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         instagram: text('instagram', 100)?.replace(/^@/, '') || existing?.instagram || null,
         faturamento: text('faturamento', 160) || existing?.faturamento || null,
         servico_interesse: service,
+        observacoes: [existing?.observacoes, details].filter((value) => typeof value === 'string' && value.trim()).join('\n\n'),
         utm_source: text('utm_source', 200),
         utm_medium: text('utm_medium', 200),
         utm_campaign: text('utm_campaign', 200),
@@ -149,7 +178,43 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       leadId = lead.id
     }
 
-    await Promise.all([
+    let dealId: string | null = null
+    let dealCreated = false
+    if (isLiberteC && waitlistPipeline) {
+      const { data: existingDeal, error: dealLookupError } = await crm.from('negocios')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('lead_id', leadId)
+        .eq('pipeline_id', waitlistPipeline.id)
+        .limit(1)
+        .maybeSingle()
+      if (dealLookupError) {
+        await crm.from('form_lead_submissions').delete().eq('id', submission.id)
+        throw new Error(`deal_lookup:${dealLookupError.code}`)
+      }
+
+      dealId = existingDeal?.id || null
+      if (!dealId) {
+        const { data: deal, error: dealError } = await crm.from('negocios').insert({
+          tenant_id: tenantId,
+          lead_id: leadId,
+          titulo: 'Lista de espera — LIBERTE-C Mercado Livre',
+          estagio: 'aberto',
+          origem: 'formulario_liberte_c',
+          canal: 'formulario',
+          pipeline_id: waitlistPipeline.id,
+          pipeline_etapa_id: waitlistPipeline.stageId,
+        }).select('id').single()
+        if (dealError || !deal) {
+          await crm.from('form_lead_submissions').delete().eq('id', submission.id)
+          throw new Error(`deal_insert:${dealError?.code || 'missing'}`)
+        }
+        dealId = deal.id
+        dealCreated = true
+      }
+    }
+
+    const followUpWrites = [
       crm.from('atividades').insert({
         tenant_id: tenantId,
         lead_id: leadId,
@@ -161,7 +226,17 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         concluida: false,
       }),
       crm.from('form_lead_submissions').update({ lead_id: leadId }).eq('id', submission.id),
-    ])
+    ]
+    if (dealCreated && dealId && waitlistPipeline) {
+      followUpWrites.push(crm.from('negocio_eventos').insert({
+        negocio_id: dealId,
+        tenant_id: tenantId,
+        tipo: 'criado',
+        etapa_nova_id: waitlistPipeline.stageId,
+        origem: 'formulario_liberte_c',
+      }))
+    }
+    await Promise.all(followUpWrites)
 
     return reply(res, 200, { ok: true })
   } catch (error) {

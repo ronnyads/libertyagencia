@@ -15,6 +15,7 @@ export interface CrmLeadPayload {
   objetivo?: string
   horas_semana?: string
   tem_investimento?: string
+  consentimento?: boolean
 }
 
 export async function sendLeadToCrm(payload: CrmLeadPayload) {
