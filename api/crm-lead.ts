@@ -56,28 +56,43 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       return reply(res, 400, { error: 'Dados do formulário inválidos' })
     }
 
+    const opportunity = isLiberteC
+      ? {
+          pipelineName: 'Lista de espera',
+          title: `LIBERTE-C — ${nome}`,
+          origin: 'formulario_liberte_c',
+        }
+      : formType === 'mentoria'
+        ? {
+            pipelineName: 'Mentoria Liberty',
+            title: `Mentoria Liberty — ${nome}`,
+            origin: 'formulario_mentoria',
+          }
+        : {
+            pipelineName: 'Diagnóstico comercial',
+            title: `Diagnóstico comercial — ${nome}`,
+            origin: 'formulario_diagnostico',
+          }
+
     const crm = createClient(supabaseUrl, supabaseSecret, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
-    let waitlistPipeline: { id: string; stageId: string } | null = null
-    if (isLiberteC) {
-      const { data: pipeline, error: pipelineError } = await crm.from('pipelines')
-        .select('id')
-        .eq('tenant_id', tenantId)
-        .eq('nome', 'Lista de espera')
-        .limit(1)
-        .maybeSingle()
-      if (pipelineError || !pipeline) throw new Error(`waitlist_pipeline:${pipelineError?.code || 'missing'}`)
+    const { data: pipeline, error: pipelineError } = await crm.from('pipelines')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('nome', opportunity.pipelineName)
+      .limit(1)
+      .maybeSingle()
+    if (pipelineError || !pipeline) throw new Error(`opportunity_pipeline:${pipelineError?.code || 'missing'}`)
 
-      const { data: stage, error: stageError } = await crm.from('pipeline_etapas')
-        .select('id')
-        .eq('pipeline_id', pipeline.id)
-        .eq('nome', 'Novo')
-        .limit(1)
-        .maybeSingle()
-      if (stageError || !stage) throw new Error(`waitlist_stage:${stageError?.code || 'missing'}`)
-      waitlistPipeline = { id: pipeline.id, stageId: stage.id }
-    }
+    const { data: stage, error: stageError } = await crm.from('pipeline_etapas')
+      .select('id')
+      .eq('pipeline_id', pipeline.id)
+      .eq('nome', 'Novo')
+      .limit(1)
+      .maybeSingle()
+    if (stageError || !stage) throw new Error(`opportunity_stage:${stageError?.code || 'missing'}`)
+    const targetPipeline = { id: pipeline.id, stageId: stage.id }
     const forwardedHeader = req.headers['x-forwarded-for']
     const clientAddress = (Array.isArray(forwardedHeader) ? forwardedHeader[0] : forwardedHeader)
       ?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown'
@@ -180,38 +195,36 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
     let dealId: string | null = null
     let dealCreated = false
-    if (isLiberteC && waitlistPipeline) {
-      const { data: existingDeal, error: dealLookupError } = await crm.from('negocios')
-        .select('id')
-        .eq('tenant_id', tenantId)
-        .eq('lead_id', leadId)
-        .eq('pipeline_id', waitlistPipeline.id)
-        .limit(1)
-        .maybeSingle()
-      if (dealLookupError) {
-        await crm.from('form_lead_submissions').delete().eq('id', submission.id)
-        throw new Error(`deal_lookup:${dealLookupError.code}`)
-      }
+    const { data: existingDeal, error: dealLookupError } = await crm.from('negocios')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('lead_id', leadId)
+      .eq('pipeline_id', targetPipeline.id)
+      .limit(1)
+      .maybeSingle()
+    if (dealLookupError) {
+      await crm.from('form_lead_submissions').delete().eq('id', submission.id)
+      throw new Error(`deal_lookup:${dealLookupError.code}`)
+    }
 
-      dealId = existingDeal?.id || null
-      if (!dealId) {
-        const { data: deal, error: dealError } = await crm.from('negocios').insert({
-          tenant_id: tenantId,
-          lead_id: leadId,
-          titulo: 'Lista de espera — LIBERTE-C Mercado Livre',
-          estagio: 'aberto',
-          origem: 'formulario_liberte_c',
-          canal: 'formulario',
-          pipeline_id: waitlistPipeline.id,
-          pipeline_etapa_id: waitlistPipeline.stageId,
-        }).select('id').single()
-        if (dealError || !deal) {
-          await crm.from('form_lead_submissions').delete().eq('id', submission.id)
-          throw new Error(`deal_insert:${dealError?.code || 'missing'}`)
-        }
-        dealId = deal.id
-        dealCreated = true
+    dealId = existingDeal?.id || null
+    if (!dealId) {
+      const { data: deal, error: dealError } = await crm.from('negocios').insert({
+        tenant_id: tenantId,
+        lead_id: leadId,
+        titulo: opportunity.title,
+        estagio: 'aberto',
+        origem: opportunity.origin,
+        canal: 'formulario',
+        pipeline_id: targetPipeline.id,
+        pipeline_etapa_id: targetPipeline.stageId,
+      }).select('id').single()
+      if (dealError || !deal) {
+        await crm.from('form_lead_submissions').delete().eq('id', submission.id)
+        throw new Error(`deal_insert:${dealError?.code || 'missing'}`)
       }
+      dealId = deal.id
+      dealCreated = true
     }
 
     const followUpWrites = [
@@ -227,13 +240,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       }),
       crm.from('form_lead_submissions').update({ lead_id: leadId }).eq('id', submission.id),
     ]
-    if (dealCreated && dealId && waitlistPipeline) {
+    if (dealCreated && dealId) {
       followUpWrites.push(crm.from('negocio_eventos').insert({
         negocio_id: dealId,
         tenant_id: tenantId,
         tipo: 'criado',
-        etapa_nova_id: waitlistPipeline.stageId,
-        origem: 'formulario_liberte_c',
+        etapa_nova_id: targetPipeline.stageId,
+        origem: opportunity.origin,
       }))
     }
     await Promise.all(followUpWrites)
