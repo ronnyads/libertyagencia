@@ -292,8 +292,8 @@ export default function LiberteCMercadoLivre() {
             <h2 className="mt-4 font-orbitron text-3xl font-black leading-tight md:text-5xl">Eu ensino o processo que uso na operação real.</h2>
             <p className="mt-6 text-lg leading-relaxed text-black/60">O LIBERTE-C nasceu para mostrar o que eu faria se precisasse começar de novo: como analisar uma oportunidade, preparar a estrutura, publicar a oferta e tomar decisões com base no que os dados mostram.</p>
             <div className="mt-8 border-y border-black/10 py-6">
-              <p className="font-orbitron text-4xl font-black tracking-[-.04em] text-[#3483FA] md:text-5xl">Operações multimilionárias</p>
-              <p className="mt-2 text-base font-bold text-black/75">Experiência prática à frente de operações de dropshipping</p>
+              <p className="font-orbitron text-4xl font-black tracking-[-.04em] text-[#3483FA] md:text-5xl">Em 2025, liderei operações de dropshipping</p>
+              <p className="mt-2 text-base font-bold text-black/75">que movimentaram milhões de reais.</p>
               <p className="mt-2 text-xs text-black/40">Histórico da operação do Ronny Oliveira. Resultado específico, sem garantia de desempenho individual.</p>
             </div>
             <blockquote className="mt-8 border-l-4 border-[#FFE600] pl-6 text-xl font-bold leading-relaxed text-black/80">“Eu não quero te ensinar truque de marketplace. Quero te ensinar a operar, tomar decisão e construir uma venda que você consegue repetir.”</blockquote>
