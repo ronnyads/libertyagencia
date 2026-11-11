@@ -338,6 +338,76 @@ video:focus-visible {
   gap: 18px;
   align-items: stretch;
 }
+.sales-proof {
+  margin-top: 64px;
+  padding: 28px;
+  border: 1px solid #d9d6cf;
+  border-radius: 20px;
+  background: #eeece4;
+}
+.sales-proof-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+  align-items: end;
+  gap: 12px 32px;
+  margin-bottom: 24px;
+}
+.sales-proof-copy .eyebrow {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #a82b21;
+}
+.sales-proof-copy h3 {
+  max-width: 17ch;
+  margin: 0;
+  font: 700 clamp(28px, 3.8vw, 48px) / 0.98 "Space Grotesk", sans-serif;
+  letter-spacing: -0.075em;
+}
+.sales-proof-copy > p:last-child {
+  margin: 0 0 3px;
+  color: #55584f;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.sales-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.sales-proof-card {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #d9d6cf;
+  border-radius: 14px;
+  background: #fff;
+}
+.sales-proof-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sales-proof-card figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 14px 16px;
+  border-top: 1px solid #e6e4dd;
+  font-size: 13px;
+}
+.sales-proof-card figcaption span {
+  color: #686a62;
+  font-variant-numeric: tabular-nums;
+}
+.sales-proof-note {
+  max-width: 84ch;
+  margin: 14px auto 0;
+  color: #66685f;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
 .video-card {
   border: 1px solid #d9d6cf;
   background: #fff;
@@ -723,6 +793,20 @@ video:focus-visible {
     margin: 22px 0 0;
   }
   .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+  .sales-proof {
+    margin-top: 40px;
+    padding: 18px;
+  }
+  .sales-proof-copy {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .sales-proof-copy h3 {
+    max-width: 20ch;
+  }
+  .sales-proof-grid {
     grid-template-columns: 1fr;
   }
   .video-card-featured {
