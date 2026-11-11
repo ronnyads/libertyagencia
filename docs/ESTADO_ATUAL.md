@@ -6,4 +6,4 @@ Página pública em produção em `/editorfantasma`, isolada do site principal. 
 
 Validação local: build e quatro testes existentes passaram; Playwright conferiu âncoras, FAQ, três vídeos com metadados carregados, botão desabilitado, ausência de overflow e ausência de erros no navegador em 1440 e 390 px. O lint do site principal ainda falha em 21 erros anteriores, fora desta página. Capturas em `docs/validacao-editor-fantasma/`.
 
-Pendente nesta atualização: publicar a nova seção de resultados e conferir os arquivos estáticos. O instalador do aplicativo ainda não foi homologado para venda; a página informa esse limite.
+Atualização publicada em 11/11/2026: seção com capturas de 7 e 30 dias e ressalva de atribuição. A rota pública e os dois arquivos de imagem responderam HTTP 200 em produção. O instalador do aplicativo ainda não foi homologado para venda; a página informa esse limite.
