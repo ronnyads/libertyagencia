@@ -16,6 +16,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/editorfantasma", "destination": "/editorfantasma/index.html" },
+    { "source": "/editorfantasma/", "destination": "/editorfantasma/index.html" },
     { "source": "/((?!api/.*).*)", "destination": "/index.html" }
   ]
 }
