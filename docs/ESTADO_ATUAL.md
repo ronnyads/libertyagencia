@@ -14,3 +14,5 @@ Atualização em 12/11/2026: avatar principal substituído pela nova ilustraçã
 Atualização em 12/11/2026: compatibilidade Windows/Mac e logotipos das plataformas aparecem somente na oferta. Os instaladores seguem aguardando homologação antes da entrega.
 
 Atualização em 12/11/2026: oferta destaca os 33 modelos prontos e explica que basta escolher e clicar em “Usar” para iniciar.
+
+Atualização em 12/11/2026: vídeos de demonstração agora abrem por clique em janela ampliada; a oferta usa uma superfície translúcida vermelha sem o painel branco, e o número de modelos aparece uma vez na seção. Build e validação local de abertura/fechamento do vídeo passaram.

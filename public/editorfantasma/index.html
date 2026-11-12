@@ -126,21 +126,20 @@
         </div>
         <div class="showcase-grid">
           <article class="video-card video-card-featured">
-            <div class="video-frame">
-              <video
-                controls
-                playsinline
-                preload="none"
-                poster="/editorfantasma/assets/editor-fantasma-capa.jpg"
-                aria-label="Demonstração do Editor Fantasma"
-              >
-                <source
-                  src="/editorfantasma/assets/editor-fantasma-demo.mp4"
-                  type="video/mp4"
-                />
-                Seu navegador não suporta vídeo HTML5.
-              </video>
-            </div>
+            <button
+              class="video-frame video-open"
+              type="button"
+              data-video-src="/editorfantasma/assets/editor-fantasma-demo.mp4"
+              data-video-title="Conheça o Editor Fantasma"
+              aria-label="Abrir vídeo: Conheça o Editor Fantasma"
+            >
+              <img
+                src="/editorfantasma/assets/editor-fantasma-capa.jpg"
+                alt="Prévia do Editor Fantasma"
+                loading="lazy"
+              />
+              <span class="video-play" aria-hidden="true">▶</span>
+            </button>
             <div class="video-meta">
               <span class="pill">01 · APRESENTAÇÃO</span>
               <h3>Conheça o Editor Fantasma</h3>
@@ -148,21 +147,20 @@
             </div>
           </article>
           <article class="video-card">
-            <div class="video-frame">
-              <video
-                controls
-                playsinline
-                preload="none"
-                poster="/editorfantasma/assets/3d-tecnico-capa.jpg"
-                aria-label="Exemplo de vídeo 3D técnico"
-              >
-                <source
-                  src="/editorfantasma/assets/3d-tecnico-demo.mp4"
-                  type="video/mp4"
-                />
-                Seu navegador não suporta vídeo HTML5.
-              </video>
-            </div>
+            <button
+              class="video-frame video-open"
+              type="button"
+              data-video-src="/editorfantasma/assets/3d-tecnico-demo.mp4"
+              data-video-title="Uma ideia técnica, visual"
+              aria-label="Abrir vídeo: Uma ideia técnica, visual"
+            >
+              <img
+                src="/editorfantasma/assets/3d-tecnico-capa.jpg"
+                alt="Prévia de vídeo 3D técnico"
+                loading="lazy"
+              />
+              <span class="video-play" aria-hidden="true">▶</span>
+            </button>
             <div class="video-meta">
               <span class="pill">02 · EXPLICAÇÃO VISUAL</span>
               <h3>Uma ideia técnica, visual</h3>
@@ -170,21 +168,20 @@
             </div>
           </article>
           <article class="video-card">
-            <div class="video-frame">
-              <video
-                controls
-                playsinline
-                preload="none"
-                poster="/editorfantasma/assets/avatar-capa.jpg"
-                aria-label="Exemplo de vídeo com avatar"
-              >
-                <source
-                  src="/editorfantasma/assets/avatar-demo.mp4"
-                  type="video/mp4"
-                />
-                Seu navegador não suporta vídeo HTML5.
-              </video>
-            </div>
+            <button
+              class="video-frame video-open"
+              type="button"
+              data-video-src="/editorfantasma/assets/avatar-demo.mp4"
+              data-video-title="Seu personagem entra em cena"
+              aria-label="Abrir vídeo: Seu personagem entra em cena"
+            >
+              <img
+                src="/editorfantasma/assets/avatar-capa.jpg"
+                alt="Prévia de vídeo com avatar"
+                loading="lazy"
+              />
+              <span class="video-play" aria-hidden="true">▶</span>
+            </button>
             <div class="video-meta">
               <span class="pill">03 · AVATAR</span>
               <h3>Seu personagem entra em cena</h3>
@@ -362,11 +359,11 @@
               próximo vídeo.
             </h2>
             <p>
-              Escolha entre 33 modelos prontos, clique em “Usar” e comece a
-              criar. Depois, ajuste o roteiro, as cenas e o resultado do seu jeito.
+              Comece por um modelo, clique em “Usar” e crie. Depois, ajuste o
+              roteiro, as cenas e o resultado do seu jeito.
             </p>
             <ul>
-              <li>33 modelos prontos: escolha, clique em “Usar” e personalize</li>
+              <li>Escolha um estilo e personalize para a sua ideia</li>
               <li>Roteiro, mídia, voz e legendas no mesmo fluxo</li>
               <li>Editor para ajustar antes de exportar</li>
               <li>Uso comercial dos vídeos que você produzir</li>
@@ -417,6 +414,24 @@
           </div>
         </div>
       </section>
+
+      <dialog
+        class="video-dialog"
+        id="video-dialog"
+        aria-label="Reprodutor de vídeo"
+      >
+        <div class="video-dialog-bar">
+          <p id="video-dialog-title">Demonstração</p>
+          <button
+            class="video-dialog-close"
+            type="button"
+            aria-label="Fechar vídeo"
+          >
+            ×
+          </button>
+        </div>
+        <video id="video-dialog-player" controls playsinline preload="none"></video>
+      </dialog>
 
       <section
         class="section wrap faq"
@@ -488,6 +503,35 @@
       </div>
     </footer>
     <script>
+      const videoDialog = document.getElementById("video-dialog");
+      const videoPlayer = document.getElementById("video-dialog-player");
+      const closeVideo = () => {
+        videoPlayer.pause();
+        videoPlayer.removeAttribute("src");
+        videoPlayer.load();
+        videoDialog.close();
+      };
+      document.querySelectorAll(".video-open").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.getElementById("video-dialog-title").textContent =
+            button.dataset.videoTitle;
+          videoPlayer.src = button.dataset.videoSrc;
+          videoDialog.showModal();
+          videoPlayer.play().catch(() => {});
+        });
+      });
+      document
+        .querySelector(".video-dialog-close")
+        .addEventListener("click", closeVideo);
+      videoDialog.addEventListener("click", (event) => {
+        if (event.target === videoDialog) closeVideo();
+      });
+      videoDialog.addEventListener("close", () => {
+        videoPlayer.pause();
+        videoPlayer.removeAttribute("src");
+        videoPlayer.load();
+      });
+
       const checkoutButton = document.getElementById("checkout-button");
       try {
         const checkout = new URL(checkoutButton.dataset.checkoutUrl);
