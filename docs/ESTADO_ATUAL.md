@@ -15,4 +15,4 @@ Atualização em 12/11/2026: compatibilidade Windows/Mac e logotipos das platafo
 
 Atualização em 12/11/2026: oferta destaca os 33 modelos prontos e explica que basta escolher e clicar em “Usar” para iniciar.
 
-Atualização em 12/11/2026: vídeos de demonstração agora abrem por clique em janela ampliada; a oferta usa uma superfície translúcida vermelha sem o painel branco, e o número de modelos aparece uma vez na seção. Build e validação local de abertura/fechamento do vídeo passaram.
+Atualização em 12/11/2026: vídeos de demonstração abrem por clique em janela ampliada. O cartão claro original da oferta foi mantido e o número de modelos aparece uma única vez, sem repetir a instrução de uso na coluna ao lado. Build e validação local de abertura/fechamento do vídeo passaram.
