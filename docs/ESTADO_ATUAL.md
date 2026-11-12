@@ -10,3 +10,5 @@ Atualização publicada em 11/11/2026: seção com capturas de 7 e 30 dias e res
 
 
 Atualização em 12/11/2026: avatar principal substituído pela nova ilustração enviada por Ronny. A imagem foi otimizada para a proporção do espaço visual da página. A versão de produção respondeu HTTP 200 na página e no novo arquivo de imagem.
+
+Atualização em 12/11/2026: landing informa compatibilidade com Windows e Mac, com logotipos das plataformas no hero e resposta correspondente no FAQ. Os instaladores seguem aguardando homologação antes da entrega.
