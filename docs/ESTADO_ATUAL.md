@@ -9,4 +9,4 @@ Validação local: build e quatro testes existentes passaram; Playwright conferi
 Atualização publicada em 11/11/2026: seção com capturas de 7 e 30 dias e ressalva de atribuição. A rota pública e os dois arquivos de imagem responderam HTTP 200 em produção. O instalador do aplicativo ainda não foi homologado para venda; a página informa esse limite.
 
 
-Atualização em 12/11/2026: avatar principal substituído pela nova ilustração enviada por Ronny. A imagem foi otimizada para a proporção do espaço visual da página; validação local concluída.
+Atualização em 12/11/2026: avatar principal substituído pela nova ilustração enviada por Ronny. A imagem foi otimizada para a proporção do espaço visual da página. A versão de produção respondeu HTTP 200 na página e no novo arquivo de imagem.
