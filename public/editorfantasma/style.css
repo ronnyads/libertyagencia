@@ -250,6 +250,23 @@ video:focus-visible {
   font-size: 12px;
   margin-left: 4px;
 }
+.offer-template-note {
+  display: grid;
+  gap: 3px;
+  margin-top: 20px;
+  padding: 13px 15px;
+  border-left: 3px solid #d93a28;
+  border-radius: 9px;
+  background: #fff;
+}
+.offer-template-note strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+}
+.offer-template-note span {
+  color: #5e625a;
+  font-size: 13px;
+}
 .hero-art {
   position: relative;
   min-height: 550px;
