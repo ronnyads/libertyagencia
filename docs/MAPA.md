@@ -3,6 +3,6 @@
 - `src/App.tsx`: roteamento do site principal em React.
 - `public/editorfantasma/index.html`: landing pública isolada do Editor Fantasma.
 - `public/editorfantasma/style.css`: tokens, layout responsivo e movimento reduzido da landing.
-- `public/editorfantasma/assets/`: avatar e vídeos reais preparados para web.
+- `public/editorfantasma/assets/`: avatar atual de Ronny e vídeos reais preparados para web.
 - `vercel.json`: rota específica `/editorfantasma` antes do fallback da aplicação React.
 - `docs/planos-em-andamento/`: planos em execução.
